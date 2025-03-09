@@ -1,0 +1,119 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Profile Name Input -->
+    <EditText
+        android:id="@+id/inputProfileName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/input_background"
+        android:hint="Your Name"
+        android:minHeight="48dp"
+        android:paddingStart="10dp" />
+
+    <EditText
+        android:id="@+id/inputLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/input_background"
+        android:hint="Location"
+        android:minHeight="48dp"
+        android:paddingStart="10dp" />
+
+    <EditText
+        android:id="@+id/inputfoodTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/input_background"
+        android:hint="Food Title"
+        android:minHeight="48dp"
+        android:paddingStart="10dp" />
+
+    <EditText
+        android:id="@+id/inputfoodDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/input_background"
+        android:hint="Food Description"
+        android:minHeight="48dp"
+        android:paddingStart="10dp" />
+
+    <!-- CardView for rounded corners around ImageView -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/postImageCard"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp">
+
+        <!-- ImageView inside CardView -->
+        <ImageView
+            android:id="@+id/postImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder"
+            tools:srcCompat="@drawable/placeholder" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Camera Button -->
+    <ImageButton
+        android:id="@+id/cameraBtn"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center|right"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/button_shape"
+        android:contentDescription="camera"
+        android:src="@drawable/camera"
+        tools:srcCompat="@drawable/camera" />
+
+    <!-- Error TextView -->
+    <TextView
+        android:id="@+id/errorTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingStart="10dp"
+        android:text="All fields are required!"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- Post Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/postButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/button_shape"
+        android:fontFamily="sans-serif-medium"
+        android:text="Post"
+        android:textAllCaps="false"
+        android:textSize="16sp" />
+
+    <!-- Cancel Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/cancelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/button_shape_1"
+        android:fontFamily="sans-serif-medium"
+        android:text="Cancel"
+        android:textAllCaps="false"
+        android:textSize="16sp" />
+
+</LinearLayout>

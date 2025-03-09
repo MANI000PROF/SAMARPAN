@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "502712404175",
+    "project_id": "samarpan-42c86",
+    "storage_bucket": "samarpan-42c86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502712404175:android:50285e65e7809acd9ecfba",
+        "android_client_info": {
+          "package_name": "com.example.samarpan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502712404175-dke4fgpjpp5bo63th8r8v1bsqgglsib1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.samarpan",
+            "certificate_hash": "6af0626541be1dfd7b821b607460973c53ede17c"
+          }
+        },
+        {
+          "client_id": "502712404175-ma8t6s54e19mrepkq8vfrovd8nmbr793.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaB06dGma3twHK56x01a7WE-Jdmlr-bKs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502712404175-89stbf97b6fq359c5uj4p3cm6p774f27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".Fragment.PostInfoFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-black"
+            android:text="Post Information"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profileImageCard"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="@+id/textView5"
+            app:layout_constraintStart_toStartOf="@+id/textView5"
+            app:layout_constraintTop_toBottomOf="@+id/textView5">
+
+            <!-- ImageView inside CardView -->
+            <ImageView
+                android:id="@+id/postImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/placeholder"
+                tools:srcCompat="@drawable/placeholder" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- MapView for showing location -->
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView3"
+            app:cardElevation="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="8dp"
+            android:layout_gravity="center"
+            app:cardCornerRadius="25dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/Location">
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/locationMapView"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:contentDescription="@string/app_name"
+                android:scaleType="center" />
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Donor Name"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/profileImageCard" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Food Title"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ProfileName" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Location"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/foodTitle" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Description of Food"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView3" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/requestFoodBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_shape"
+            android:fontFamily="sans-serif-light"
+            android:text="Request Food"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/foodDescription" />
+
+        <TextView
+            android:id="@+id/ProfileName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_background"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center|start"
+            android:paddingStart="8dp"
+            android:text="Name"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+        <TextView
+            android:id="@+id/foodTitle"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_background"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center|start"
+            android:paddingStart="8dp"
+            android:text="Food Title"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+        <TextView
+            android:id="@+id/Location"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_background"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center|start"
+            android:paddingStart="8dp"
+            android:text="Location"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+        <TextView
+            android:id="@+id/foodDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/input_background"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center|start"
+            android:minHeight="48dp"
+            android:paddingStart="8dp"
+            android:text="Food Description"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView9" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

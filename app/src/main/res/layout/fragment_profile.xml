@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragment.ProfileFragment">
+
+    <!-- AppBar for Scrolling Effect -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:fitsSystemWindows="true"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginEnd="16dp"
+            app:expandedTitleMarginStart="72dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:titleEnabled="false">
+
+            <!-- Toolbar with Menu -->
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/ic_launcher_background"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/icon_menu"
+                app:title="Profile"
+                android:backgroundTint="@android:color/transparent"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:menu="@menu/menu_profile" />
+
+            <!-- Profile Image in FrameLayout for better positioning -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/profileImageCard"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="60dp"
+                    android:elevation="6dp"
+                    app:cardCornerRadius="60dp"
+                    app:cardElevation="6dp">
+
+                    <ImageView
+                        android:id="@+id/profileImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/placeholder"
+                        tools:ignore="ContentDescription" />
+                </androidx.cardview.widget.CardView>
+            </FrameLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- User Name -->
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textStyle="bold" />
+
+            <!-- User Details -->
+            <TextView
+                android:id="@+id/userDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email | Location | Other Details"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <!-- Profile Options -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/myDonationsBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="My Donations" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/myConnectionsBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="My Connections" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/myRecordsBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Records &amp; History" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

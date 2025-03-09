@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/homeFragment2">
+    <fragment
+        android:id="@+id/homeFragment2"
+        android:name="com.example.samarpan.Fragment.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/historyFragment2"
+        android:name="com.example.samarpan.Fragment.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/searchFragment2"
+        android:name="com.example.samarpan.Fragment.SearchFragment"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/profileFragment2"
+        android:name="com.example.samarpan.Fragment.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/postInfoFragment"
+        android:name="com.example.samarpan.Fragment.PostInfoFragment"
+        android:label="Post Information"
+        tools:layout="@layout/fragment_post_info" />
+    <action
+        android:id="@+id/action_currentFragment_to_postInfoFragment"
+        app:destination="@id/postInfoFragment" />
+
+</navigation>
