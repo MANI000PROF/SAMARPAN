@@ -11,16 +11,14 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginEnd="16dp"
-            app:expandedTitleMarginStart="72dp"
+            android:layout_height="250dp"
+            app:contentScrim="@color/ic_launcher_background"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
@@ -29,11 +27,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/ic_launcher_background"
+                android:background="@android:color/transparent"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/icon_menu"
-                app:title="Profile"
-                android:backgroundTint="@android:color/transparent"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:menu="@menu/menu_profile" />
 
@@ -47,10 +42,9 @@
                     android:id="@+id/profileImageCard"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="60dp"
+                    android:layout_gravity="center"
                     android:elevation="6dp"
-                    app:cardCornerRadius="60dp"
+                    app:cardCornerRadius="75dp"
                     app:cardElevation="6dp">
 
                     <ImageView
@@ -125,4 +119,5 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

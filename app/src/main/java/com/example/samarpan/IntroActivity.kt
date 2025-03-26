@@ -4,21 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
+import com.google.firebase.auth.FirebaseAuth
 
 class IntroActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        auth = FirebaseAuth.getInstance()
+
+        // ✅ Check if user is already logged in
+        if (auth.currentUser != null) {
+            // User is logged in, redirect to MainActivity
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()  // Close IntroActivity so user can't go back to it
+            return  // Exit onCreate early
+        }
+
         setContentView(R.layout.activity_intro)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
 
         // Find buttons
         val signUpButton = findViewById<Button>(R.id.button)
@@ -26,13 +33,11 @@ class IntroActivity : AppCompatActivity() {
 
         // Set click listeners
         signUpButton.setOnClickListener {
-            // Navigate to SignUpActivity
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
 
         loginButton.setOnClickListener {
-            // Navigate to LoginActivity
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }

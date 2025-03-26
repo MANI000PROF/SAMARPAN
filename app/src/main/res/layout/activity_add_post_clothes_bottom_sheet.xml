@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".Fragment.AddPostClothesBottomSheet">
 
     <!-- Profile Name Input -->
     <EditText
@@ -39,22 +40,22 @@
 
 
     <EditText
-        android:id="@+id/inputfoodTitle"
+        android:id="@+id/inputClothesTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/input_background"
-        android:hint="Food Title"
+        android:hint="Clothes Title"
         android:minHeight="48dp"
         android:paddingStart="10dp" />
 
     <EditText
-        android:id="@+id/inputfoodDescription"
+        android:id="@+id/inputClothesDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/input_background"
-        android:hint="Food Description"
+        android:hint="Clothes Description"
         android:minHeight="48dp"
         android:paddingStart="10dp" />
 

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +15,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
-import com.example.samarpan.Adapter.PostAdapter
-import com.example.samarpan.Model.DonationPosts
+import com.example.samarpan.Adapter.PostClothesAdapter
+import com.example.samarpan.Model.DonationPostsClothes
 import com.example.samarpan.R
-import com.example.samarpan.databinding.FragmentHomeBinding
+import com.example.samarpan.databinding.ActivityHomeFragmentClothesBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
@@ -27,15 +28,15 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class HomeFragment : Fragment() {
+class HomeFragmentClothes : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: ActivityHomeFragmentClothesBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var database: DatabaseReference
-    private val postList = ArrayList<DonationPosts>()
-    private var fullPostList = ArrayList<DonationPosts>() // Store all posts before filtering
-    private lateinit var postAdapter: PostAdapter
+    private val postList = ArrayList<DonationPostsClothes>()
+    private var fullPostList = ArrayList<DonationPostsClothes>() // Store all posts before filtering
+    private lateinit var postClothesAdapter: PostClothesAdapter
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var userLocation: Location? = null
 
@@ -43,7 +44,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = ActivityHomeFragmentClothesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -62,14 +63,14 @@ class HomeFragment : Fragment() {
         binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
 
         // RecyclerView setup
-        postAdapter = PostAdapter(postList, userLocation) { selectedPost ->
-            openPostInfoFragment(selectedPost)
+        postClothesAdapter = PostClothesAdapter(postList, userLocation) { selectedPost ->
+            openPostClothesInfoFragment(selectedPost)
         }
 
         binding.postRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.postRecyclerView.adapter = postAdapter
+        binding.postRecyclerView.adapter = postClothesAdapter
 
-        database = FirebaseDatabase.getInstance().getReference("DonationPosts")
+        database = FirebaseDatabase.getInstance().getReference("DonationPostsClothes")
 
         // Load Posts from Firebase
         loadPosts()
@@ -79,18 +80,18 @@ class HomeFragment : Fragment() {
         binding.filterBtn.setOnClickListener {
             val location = binding.locationEditText.text.toString().trim()
             if (location.isEmpty()) {
-                postAdapter.updatePostList(fullPostList, userLocation) // Restore full list
+                postClothesAdapter.updatePostList(fullPostList, userLocation) // Restore full list
             } else {
                 val filteredPosts = fullPostList.filter { it.location?.contains(location, ignoreCase = true) ?: false }
-                postAdapter.updatePostList(filteredPosts, userLocation)
+                postClothesAdapter.updatePostList(filteredPosts, userLocation)
             }
         }
 
 
         // Add Post Button
         binding.addPostBtn.setOnClickListener {
-            val addPostBottomSheet = AddPostBottomSheet()
-            addPostBottomSheet.show(parentFragmentManager, "AddPostBottomSheet")
+            val addPostClothesBottomSheet = AddPostClothesBottomSheet()
+            addPostClothesBottomSheet.show(parentFragmentManager, "AddPostClothesBottomSheet")
         }
 
     }
@@ -110,7 +111,7 @@ class HomeFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     userLocation = location
-                    postAdapter.updatePostList(postList, userLocation) // Update with location
+                    postClothesAdapter.updatePostList(postList, userLocation) // Update with location
                 }
             }
         } else {
@@ -124,7 +125,7 @@ class HomeFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 postList.clear()
                 for (dataSnapshot in snapshot.children) {
-                    val post = dataSnapshot.getValue(DonationPosts::class.java)
+                    val post = dataSnapshot.getValue(DonationPostsClothes::class.java)
                     if (post != null) postList.add(post)
                 }
 
@@ -141,7 +142,7 @@ class HomeFragment : Fragment() {
                     binding.postRecyclerView.visibility = View.VISIBLE
                 }
 
-                postAdapter.notifyDataSetChanged()
+                postClothesAdapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -162,14 +163,17 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun openPostInfoFragment(selectedPost: DonationPosts) {
+    private fun openPostClothesInfoFragment(selectedPost: DonationPostsClothes) {
+        Log.d("NavigationDebug", "Navigating with post: ${selectedPost.clothesTitle}, Lat: ${selectedPost.latitude}, Lng: ${selectedPost.longitude}")
+
         val bundle = Bundle().apply {
             putSerializable("post_data", selectedPost)
         }
-        findNavController().navigate(R.id.action_homeFragment2_to_postInfoFragment, bundle)
+        findNavController().navigate(R.id.action_homeFragment2_to_postClothesInfoFragment, bundle)
     }
 
-    private fun addPostToFirebase(post: DonationPosts) {
+
+    private fun addPostToFirebase(post: DonationPostsClothes) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         val postId = database.push().key ?: return
         val updatedPost = post.copy(donorId = currentUserId)
@@ -177,7 +181,7 @@ class HomeFragment : Fragment() {
         database.child(postId).setValue(updatedPost).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 postList.add(updatedPost)
-                postAdapter.notifyItemInserted(postList.size - 1)
+                postClothesAdapter.notifyItemInserted(postList.size - 1)
                 binding.noPostsTextView.visibility = View.GONE
                 binding.postRecyclerView.visibility = View.VISIBLE
             }
@@ -189,3 +193,4 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 }
+

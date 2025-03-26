@@ -35,12 +35,12 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
-class AddPostBottomSheet : BottomSheetDialogFragment() {
+class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
 
     private lateinit var inputProfileName: EditText
     private lateinit var inputLocation: EditText
-    private lateinit var inputFoodTitle: EditText
-    private lateinit var inputFoodDescription: EditText
+    private lateinit var inputClothesTitle: EditText
+    private lateinit var inputClothesDescription: EditText
     private lateinit var postImage: ImageView
     private lateinit var cameraBtn: ImageButton
     private lateinit var errorTextView: TextView
@@ -62,7 +62,7 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.add_post_bottom_sheet, container, false)
+        return inflater.inflate(R.layout.activity_add_post_clothes_bottom_sheet, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,8 +70,8 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
 
         inputProfileName = view.findViewById(R.id.inputProfileName)
         inputLocation = view.findViewById(R.id.inputLocation)
-        inputFoodTitle = view.findViewById(R.id.inputfoodTitle)
-        inputFoodDescription = view.findViewById(R.id.inputfoodDescription)
+        inputClothesTitle = view.findViewById(R.id.inputClothesTitle)
+        inputClothesDescription = view.findViewById(R.id.inputClothesDescription)
         postImage = view.findViewById(R.id.postImage)
         cameraBtn = view.findViewById(R.id.cameraBtn)
         errorTextView = view.findViewById(R.id.errorTextView)
@@ -79,7 +79,7 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
         cancelButton = view.findViewById(R.id.cancelButton)
         locationBtn = view.findViewById(R.id.pickLocationButton)
 
-        database = FirebaseDatabase.getInstance().reference.child("DonationPosts")
+        database = FirebaseDatabase.getInstance().reference.child("DonationPostsClothes")
 
         initCloudinary()
 
@@ -159,7 +159,6 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun analyzeImageWithMLKit(bitmap: Bitmap?) {
-
         if (bitmap == null) {
             Toast.makeText(context, "Failed to process image. Bitmap is null.", Toast.LENGTH_SHORT).show()
             Log.e("MLKit", "Bitmap is null. Cannot analyze image.")
@@ -171,29 +170,26 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
             return
         }
 
-
         try {
             val image = InputImage.fromBitmap(bitmap, 0)
-
-            // ✅ Ensure ML Kit is properly initialized before calling getClient()
-            val labeler = try {
-                ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
-            } catch (e: Exception) {
-                Log.e("MLKit", "Failed to initialize ImageLabeling: ${e.message}")
-                Toast.makeText(context, "Error initializing ML Kit.", Toast.LENGTH_SHORT).show()
-                return
-            }
+            val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
 
             labeler.process(image)
                 .addOnSuccessListener { labels ->
                     if (labels.isNotEmpty()) {
-                        val foodLabel = labels.firstOrNull { it.text.contains("food", ignoreCase = true) && it.confidence >= 0.8 }
-                        if (foodLabel != null) {
+                        // ✅ Check for Clothes-related keywords
+                        val clothesKeywords = listOf("clothing", "apparel", "shirt", "pants", "jacket", "dress", "jeans", "fabric")
+                        val detectedClothes = labels.firstOrNull { label ->
+                            clothesKeywords.any { keyword -> label.text.contains(keyword, ignoreCase = true) } && label.confidence >= 0.6
+                        }
+
+                        if (detectedClothes != null) {
                             postImage.setImageBitmap(bitmap)
-                            Toast.makeText(context, "Food detected! Uploading image...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Clothes detected! Uploading image...", Toast.LENGTH_SHORT).show()
                             uploadImageToCloudinary(bitmap)
                         } else {
-                            Toast.makeText(context, "No food detected. Try again.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "No Clothes detected. Try again.", Toast.LENGTH_LONG).show()
+                            Log.d("MLKit", "Detected labels: ${labels.joinToString { "${it.text} (${it.confidence})" }}")
                         }
                     } else {
                         Toast.makeText(context, "No labels detected. Try again.", Toast.LENGTH_SHORT).show()
@@ -253,8 +249,8 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
     private fun postFoodDetails() {
         val name = inputProfileName.text.toString()
         val locationText = inputLocation.text.toString()
-        val foodTitle = inputFoodTitle.text.toString()
-        val foodDescription = inputFoodDescription.text.toString()
+        val clothesTitle = inputClothesTitle.text.toString()
+        val clothesDescription = inputClothesDescription.text.toString()
         val imageUrl = cloudinaryImageUrl ?: ""
 
         val postId = database.push().key // Generate unique key for the post
@@ -272,9 +268,9 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
                 "location" to locationText,  // Keeping this for display
                 "latitude" to latitude,      // ✅ Storing latitude
                 "longitude" to longitude,    // ✅ Storing longitude
-                "foodTitle" to foodTitle,
-                "foodDescription" to foodDescription,
-                "foodImage" to imageUrl,
+                "clothesTitle" to clothesTitle,
+                "clothesDescription" to clothesDescription,
+                "clothesImage" to imageUrl,
                 "userId" to currentUserId,
                 "timestamp" to System.currentTimeMillis()
             )
@@ -294,7 +290,7 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
     private fun validateInputs(): Boolean {
         return inputProfileName.text.isNotEmpty() &&
                 inputLocation.text.isNotEmpty() &&
-                inputFoodTitle.text.isNotEmpty() &&
-                inputFoodDescription.text.isNotEmpty()
+                inputClothesTitle.text.isNotEmpty() &&
+                inputClothesDescription.text.isNotEmpty()
     }
 }

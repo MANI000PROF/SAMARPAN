@@ -29,8 +29,37 @@
         android:name="com.example.samarpan.Fragment.PostInfoFragment"
         android:label="Post Information"
         tools:layout="@layout/fragment_post_info" />
+    <fragment
+        android:id="@+id/postClothesInfoFragment"
+        android:name="com.example.samarpan.Fragment.PostClothesInfoFragment"
+        android:label="Post Information"
+        tools:layout="@layout/fragment_post_clothes_info" />
+    <fragment
+        android:id="@+id/postElectronicsInfoFragment"
+        android:name="com.example.samarpan.Fragment.PostElectronicsInfoFragment"
+        android:label="Post Information"
+        tools:layout="@layout/fragment_post_electronics_info" />
+
+    <fragment
+        android:id="@+id/homeFragmentClothes"
+        android:name="com.example.samarpan.Fragment.HomeFragmentClothes"
+        android:label="Clothes Donation"
+        tools:layout="@layout/activity_home_fragment_clothes" />
+
+    <fragment
+        android:id="@+id/homeFragmentElectronics"
+        android:name="com.example.samarpan.Fragment.HomeFragmentElectronics"
+        android:label="Electronics Donation"
+        tools:layout="@layout/activity_home_fragment_electronics"/>
+
     <action
-        android:id="@+id/action_currentFragment_to_postInfoFragment"
+        android:id="@+id/action_homeFragment2_to_postInfoFragment"
         app:destination="@id/postInfoFragment" />
+    <action
+        android:id="@+id/action_homeFragment2_to_postClothesInfoFragment"
+        app:destination="@id/postClothesInfoFragment" />
+    <action
+        android:id="@+id/action_homeFragment2_to_postElectronicsInfoFragment"
+        app:destination="@id/postElectronicsInfoFragment" />
 
 </navigation>

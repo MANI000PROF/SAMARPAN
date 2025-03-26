@@ -51,4 +51,34 @@
         app:layout_constraintVertical_bias="1.0"
         app:navGraph="@navigation/nav_graph" />
 
+    <ImageView
+        android:id="@+id/clothesBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintEnd_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/textView4"
+        app:srcCompat="@drawable/clothes_icon" />
+
+    <ImageView
+        android:id="@+id/electronicsBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintEnd_toStartOf="@+id/foodBtn"
+        app:srcCompat="@drawable/electronics_icon" />
+
+    <ImageView
+        android:id="@+id/foodBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintEnd_toStartOf="@+id/clothesBtn"
+        app:layout_constraintTop_toTopOf="@+id/textView4"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/food_icon" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,12 +8,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.samarpan.Model.DonationPost
+import com.example.samarpan.Model.DonationPosts
 import com.example.samarpan.R
 
 class HistoryAdapter(
     private val context: Context,
-    private val postList: List<DonationPost>
+    private val postList: List<DonationPosts>
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     // ViewHolder class

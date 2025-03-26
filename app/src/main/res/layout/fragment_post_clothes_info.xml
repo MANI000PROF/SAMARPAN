@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".Fragment.PostInfoFragment">
+    tools:context=".Fragment.PostClothesInfoFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -53,24 +53,26 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView3"
-            app:cardElevation="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="10dp"
             android:layout_marginRight="8dp"
-            android:layout_gravity="center"
-            app:cardCornerRadius="25dp"
             android:clickable="true"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Location">
+            app:layout_constraintTop_toBottomOf="@+id/Location"
+            tools:ignore="DuplicateClickableBoundsCheck">
 
             <org.osmdroid.views.MapView
                 android:id="@+id/locationMapView"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:clickable="true" />
+                android:clickable="true"
+                android:contentDescription="@string/app_name" />
         </androidx.cardview.widget.CardView>
 
 
@@ -93,7 +95,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Food Title"
+            android:text="Clothes Title"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ProfileName" />
@@ -108,7 +110,7 @@
             android:text="Location"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/foodTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/clothesTitle" />
 
         <TextView
             android:id="@+id/textView9"
@@ -117,28 +119,28 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Description of Food"
+            android:text="Description of Clothes"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cardView3" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/requestFoodBtn"
+            android:id="@+id/requestClothesBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="16dp"
-            android:background="@drawable/button_shape"
+            android:background="@drawable/button_shape_1"
             android:fontFamily="sans-serif-light"
-            android:text="Request Food"
+            android:text="Request Clothes"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/foodDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/clothesDescription" />
 
         <TextView
             android:id="@+id/ProfileName"
@@ -156,7 +158,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
         <TextView
-            android:id="@+id/foodTitle"
+            android:id="@+id/clothesTitle"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
@@ -164,7 +166,7 @@
             android:fontFamily="sans-serif-light"
             android:gravity="center|start"
             android:paddingStart="8dp"
-            android:text="Food Title"
+            android:text="Clothes Title"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -186,7 +188,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
         <TextView
-            android:id="@+id/foodDescription"
+            android:id="@+id/clothesDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -195,7 +197,7 @@
             android:gravity="center|start"
             android:minHeight="48dp"
             android:paddingStart="8dp"
-            android:text="Food Description"
+            android:text="Clothes Description"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

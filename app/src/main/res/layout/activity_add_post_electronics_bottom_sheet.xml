@@ -39,22 +39,22 @@
 
 
     <EditText
-        android:id="@+id/inputfoodTitle"
+        android:id="@+id/inputElectronicsTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/input_background"
-        android:hint="Food Title"
+        android:hint="Electronics Title"
         android:minHeight="48dp"
         android:paddingStart="10dp" />
 
     <EditText
-        android:id="@+id/inputfoodDescription"
+        android:id="@+id/inputElectronicsDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/input_background"
-        android:hint="Food Description"
+        android:hint="Electronics Description"
         android:minHeight="48dp"
         android:paddingStart="10dp" />
 

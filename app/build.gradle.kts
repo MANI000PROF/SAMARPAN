@@ -61,6 +61,10 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.play.services.cast.tv)
+    implementation(libs.firebase.firestore.ktx)
+//    implementation(libs.vision.common)
+//    implementation(libs.image.labeling.common)
+//    implementation(libs.image.labeling.default.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,8 +73,31 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.13.2")
     kapt("com.github.bumptech.glide:compiler:4.13.2")
 
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+    implementation("com.google.mlkit:image-labeling:17.0.7")
+    implementation("com.google.mlkit:image-labeling-common:17.0.1")
+    implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    // *Google ML Kit Dependencies for Image Labeling*
+    implementation("com.google.mlkit:image-labeling:17.0.7") // Default image labeling
+    implementation("com.google.mlkit:image-labeling-custom:17.0.1") // Custom Model support
+
+    // *Google ML Kit Object Detection (For food freshness classification)*
+    implementation("com.google.mlkit:object-detection:17.0.1")
+
+    // *TensorFlow Lite (Optional: For custom AI model support)*
+    implementation("org.tensorflow:tensorflow-lite:2.10.0")
+
+    // *CameraX Dependencies for Image Capture*
+    implementation("androidx.camera:camera-core:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-view:1.3.0")
+
     implementation("com.cloudinary:cloudinary-android:3.0.2")
 
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("com.google.android.gms:play-services-maps:18.0.0")
     implementation("com.google.android.gms:play-services-location:18.0.0")
 

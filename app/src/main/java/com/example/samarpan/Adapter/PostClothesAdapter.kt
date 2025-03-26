@@ -1,32 +1,33 @@
 package com.example.samarpan.Adapter
 
 import android.location.Location
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.samarpan.Model.DonationPosts
+import com.example.samarpan.Model.DonationPostsClothes
 import com.example.samarpan.R
 import com.example.samarpan.databinding.PostItemBinding
 
-class PostAdapter(
-    private var postList: MutableList<DonationPosts>,
-    private var userLocation: Location?,
-    private val onPostClick: (DonationPosts) -> Unit
-) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostClothesAdapter(
+    private var postList: MutableList<DonationPostsClothes>,
+    private var userLocation: Location? = null,
+    private val onPostClick: (DonationPostsClothes) -> Unit
+) : RecyclerView.Adapter<PostClothesAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(private val binding: PostItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(post: DonationPosts) {
+        fun bind(post: DonationPostsClothes) {
             binding.profileName.text = post.profileName ?: "Unknown"
             binding.location.text = post.location ?: "Unknown"
-            binding.foodTitle.text = post.foodTitle ?: "Unknown"
+            binding.foodTitle.text = post.clothesTitle ?: "Unknown" // Replace this with clothesTitle in XML for clothes posts
 
-            // Load image with Glide
+            // Load image with Glide (Make sure the image is related to clothes)
             Glide.with(binding.foodImage.context)
-                .load(post.foodImage ?: "")
+                .load(post.clothesImage ?: "") // You may want to change the foodImage reference to clothesImage
                 .placeholder(R.drawable.placeholder)
                 .into(binding.foodImage)
 
@@ -61,7 +62,7 @@ class PostAdapter(
 
     override fun getItemCount(): Int = postList.size
 
-    fun updatePostList(newPosts: List<DonationPosts>, userLocation: Location?) {
+    fun updatePostList(newPosts: List<DonationPostsClothes>, userLocation: Location?) {
         this.userLocation = userLocation
         postList.clear()
 

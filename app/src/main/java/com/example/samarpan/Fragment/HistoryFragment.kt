@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.samarpan.Model.DonationPost
+import com.example.samarpan.Model.DonationPosts
 import com.example.samarpan.R
 import com.example.samarpan.adapter.HistoryAdapter
 import com.example.samarpan.databinding.FragmentHistoryBinding
@@ -20,7 +20,7 @@ class HistoryFragment : Fragment() {
 
     private lateinit var database: DatabaseReference
     private lateinit var historyAdapter: HistoryAdapter
-    private val postList = mutableListOf<DonationPost>()
+    private val postList = mutableListOf<DonationPosts>()
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreateView(
@@ -42,10 +42,15 @@ class HistoryFragment : Fragment() {
         }
 
         // Initialize Firebase reference
-        database = FirebaseDatabase.getInstance().getReference("donationPosts")
+        database = FirebaseDatabase.getInstance().getReference("DonationPosts")
 
-        // Load user's posts
-        loadUserPosts()
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            showNoPosts()
+            return
+        } else {
+            loadUserPosts() // Load posts only when user is authenticated
+        }
     }
 
     private fun loadUserPosts() {
@@ -54,13 +59,13 @@ class HistoryFragment : Fragment() {
             return
         }
 
-        // Query posts created by the current user
         database.orderByChild("userId").equalTo(currentUserId)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     postList.clear()
+
                     for (dataSnapshot in snapshot.children) {
-                        val post = dataSnapshot.getValue(DonationPost::class.java)
+                        val post = dataSnapshot.getValue(DonationPosts::class.java)
                         if (post != null) {
                             postList.add(post)
                         }
@@ -71,13 +76,18 @@ class HistoryFragment : Fragment() {
                     } else {
                         showPosts()
                     }
+                    historyAdapter.notifyDataSetChanged() // Ensure the adapter updates
+
+                    // Debugging: Print the posts retrieved
+                    println("HistoryFragment: Fetched ${postList.size} posts for user $currentUserId")
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // Handle database error (optional: show a message to the user)
+                    println("HistoryFragment: Firebase Error - ${error.message}")
                 }
             })
     }
+
 
     private fun showNoPosts() {
         binding.donationPostImg.visibility = View.VISIBLE
