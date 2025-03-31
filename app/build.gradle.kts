@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
-    kotlin("kapt")
 }
 
 android {
@@ -10,7 +9,7 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "com.example.samarpan"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -62,16 +61,14 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.play.services.cast.tv)
     implementation(libs.firebase.firestore.ktx)
-//    implementation(libs.vision.common)
-//    implementation(libs.image.labeling.common)
-//    implementation(libs.image.labeling.default.common)
+    implementation(libs.androidx.compose.material)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
     implementation("com.github.bumptech.glide:glide:4.13.2")
-    kapt("com.github.bumptech.glide:compiler:4.13.2")
 
     implementation("com.cloudinary:cloudinary-android:2.3.1")
     implementation("com.google.mlkit:image-labeling:17.0.7")
@@ -79,7 +76,6 @@ dependencies {
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
     // *Google ML Kit Dependencies for Image Labeling*
     implementation("com.google.mlkit:image-labeling:17.0.7") // Default image labeling
     implementation("com.google.mlkit:image-labeling-custom:17.0.1") // Custom Model support
@@ -87,8 +83,6 @@ dependencies {
     // *Google ML Kit Object Detection (For food freshness classification)*
     implementation("com.google.mlkit:object-detection:17.0.1")
 
-    // *TensorFlow Lite (Optional: For custom AI model support)*
-    implementation("org.tensorflow:tensorflow-lite:2.10.0")
 
     // *CameraX Dependencies for Image Capture*
     implementation("androidx.camera:camera-core:1.3.0")

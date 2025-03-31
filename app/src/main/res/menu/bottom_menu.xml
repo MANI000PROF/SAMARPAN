@@ -8,6 +8,9 @@
     <item android:title="History"
         android:id="@+id/historyFragment2"
         android:icon="@drawable/history"/>
+    <item android:title="Leader Board"
+        android:id="@+id/leaderBoardFragment2"
+        android:icon="@drawable/leader_board"/>
     <item android:title="Search"
         android:id="@+id/searchFragment2"
         android:icon="@drawable/search"/>

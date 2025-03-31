@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".Fragment.LeaderBoardFragment">
+
+    <!-- Top Donor Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center"
+        android:background="@drawable/leaderboard_top_bg">
+
+        <ImageView
+            android:id="@+id/crownIcon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/crown"
+            android:visibility="visible"
+            android:layout_gravity="center"/>
+
+        <ImageView
+            android:id="@+id/topDonorImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_placeholder"
+            android:background="@drawable/circle_bg"
+            android:layout_marginTop="8dp"
+            android:elevation="4dp"/>
+
+        <TextView
+            android:id="@+id/topDonorName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top Donor Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/topDonorDonations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50 Donations"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+
+    </LinearLayout>
+
+    <!-- Graph Placeholder -->
+    <ImageView
+        android:id="@+id/donationGraph"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@drawable/graph_placeholder"
+        android:scaleType="fitCenter"
+        android:layout_margin="16dp"
+        android:background="@drawable/card_bg"/>
+
+    <!-- Leaderboard List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/leaderboardRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"/>
+
+</LinearLayout>

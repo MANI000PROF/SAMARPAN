@@ -2,4 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="leaderboard_item_bg">#F5F5F5</color>  <!-- Light background -->
+    <color name="leaderboard_item_border">#E0E0E0</color>  <!-- Subtle border color -->
+    <color name="route_color">#FF5722</color>
 </resources>

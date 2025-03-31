@@ -1,12 +1,17 @@
 package com.example.samarpan.Fragment
 
+import android.Manifest
 import android.app.Dialog
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.samarpan.Model.DonationPosts
@@ -16,9 +21,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class PostInfoFragment : Fragment() {
 
@@ -29,6 +38,9 @@ class PostInfoFragment : Fragment() {
     private var longitude: Double = 0.0
     private lateinit var post: DonationPosts
     private lateinit var mapView: MapView
+    private lateinit var myLocationOverlay: MyLocationNewOverlay
+    private var userGeoPoint: GeoPoint? = null
+    private var donorGeoPoint: GeoPoint? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,13 +54,13 @@ class PostInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Get post data from arguments
-        post = arguments?.getSerializable("post_data") as? DonationPosts
-            ?: return
+        post = arguments?.getSerializable("post_data") as? DonationPosts ?: return
 
         Log.d("PostInfoFragment", "Post retrieved: ${post.foodTitle}, Lat: ${post.latitude}, Lng: ${post.longitude}")
 
         latitude = post.latitude ?: 0.0
         longitude = post.longitude ?: 0.0
+        donorGeoPoint = GeoPoint(latitude, longitude)
 
         // Populate UI with post data
         displayPostDetails()
@@ -59,7 +71,6 @@ class PostInfoFragment : Fragment() {
 
         // Expand Map on Click
         binding.cardView3.setOnClickListener {
-            Log.d("PostInfoFragment", "CardView clicked!") // 🔴 Debugging log
             showFullScreenMap()
         }
 
@@ -67,7 +78,6 @@ class PostInfoFragment : Fragment() {
         binding.requestFoodBtn.setOnClickListener {
             sendFoodRequest()
         }
-
     }
 
     private fun sendFoodRequest() {
@@ -115,39 +125,58 @@ class PostInfoFragment : Fragment() {
     }
 
     private fun setupOSMMap() {
-        // Configure OSM
         Configuration.getInstance().load(requireContext(), requireContext().getSharedPreferences("osmdroid", 0))
 
-        // Set Tile Source
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
 
-        // 🔴 Debugging Logs
-        Log.d("PostInfoFragment", "setupOSMMap called. Latitude: $latitude, Longitude: $longitude")
+        val overlays = mapView.overlays
+        overlays.clear() // Clear previous overlays
 
-        if (latitude != 0.0 && longitude != 0.0) {
-            val geoPoint = GeoPoint(latitude, longitude)
+        // 🔴 Step 1: Add Donor Location Marker
+        val donorLocation = GeoPoint(latitude, longitude)
+        val donorMarker = Marker(mapView)
+        donorMarker.position = donorLocation
+        donorMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        donorMarker.title = "Food Location"
+        overlays.add(donorMarker)
 
-            Log.d("PostInfoFragment", "Setting marker at: $geoPoint") // 🔴 Debugging Log
+        // 🔴 Step 2: Setup Location Provider with a Delay for Accuracy
+        val locationProvider = GpsMyLocationProvider(requireContext())
+        myLocationOverlay = MyLocationNewOverlay(locationProvider, mapView)
+        myLocationOverlay.enableMyLocation()
+        overlays.add(myLocationOverlay)
 
-            mapView.controller.setZoom(15.0)
-            mapView.controller.setCenter(geoPoint)
-
-            val marker = Marker(mapView)
-            marker.position = geoPoint
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            marker.title = "Food Location"
-            mapView.overlays.add(marker)
+        // 🔴 Step 3: Wait for Accurate Location Update
+        Handler(Looper.getMainLooper()).postDelayed({
+            userGeoPoint = myLocationOverlay.myLocation
+            if (userGeoPoint != null && userGeoPoint!!.latitude != 0.0 && userGeoPoint!!.longitude != 0.0) {
+                Log.d("PostInfoFragment", "User Location Found: ${userGeoPoint!!.latitude}, ${userGeoPoint!!.longitude}")
+                mapView.zoomToBoundingBox(BoundingBox.fromGeoPoints(listOf(donorLocation, userGeoPoint!!)), true)
+                drawRoute(donorLocation, userGeoPoint!!)
+            } else {
+                Log.e("PostInfoFragment", "User Location Not Found, Defaulting to Donor Location")
+                Toast.makeText(requireContext(), "Unable to fetch current location!", Toast.LENGTH_SHORT).show()
+                mapView.controller.setZoom(15.0)
+                mapView.controller.setCenter(donorLocation)
+            }
             mapView.invalidate()
-        } else {
-            Log.e("PostInfoFragment", "Invalid location: Latitude = $latitude, Longitude = $longitude") // 🔴 Debugging Log
-        }
+        }, 4000) // Wait 4 seconds to get a more accurate location
     }
 
 
-    private fun showFullScreenMap() {
-        Log.d("PostInfoFragment", "Opening full-screen map...") // 🔴 Debugging log
+    private fun drawRoute(start: GeoPoint, end: GeoPoint) {
+        val polyline = Polyline()
+        polyline.addPoint(start)
+        polyline.addPoint(end)
+        polyline.color = resources.getColor(R.color.route_color, null)
+        polyline.width = 8f
 
+        mapView.overlays.add(polyline)
+        mapView.invalidate()
+    }
+
+    private fun showFullScreenMap() {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         dialog.setContentView(R.layout.dialog_fullscreen_map)
 
@@ -155,25 +184,30 @@ class PostInfoFragment : Fragment() {
         fullScreenMapView.setTileSource(TileSourceFactory.MAPNIK)
         fullScreenMapView.setMultiTouchControls(true)
 
-        // Ensure correct location
-        val geoPoint = GeoPoint(latitude, longitude)
-
-        Log.d("PostInfoFragment", "Full-screen map location: Latitude = $latitude, Longitude = $longitude") // 🔴 Debugging log
-
+        val donorLocation = GeoPoint(latitude, longitude)
         fullScreenMapView.controller.setZoom(15.0)
-        fullScreenMapView.controller.setCenter(geoPoint)
+        fullScreenMapView.controller.setCenter(donorLocation)
 
-        // Add marker
-        val marker = Marker(fullScreenMapView)
-        marker.position = geoPoint
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        marker.title = "Food Location"
-        fullScreenMapView.overlays.add(marker)
-        fullScreenMapView.invalidate()
+        // Add donor marker
+        val donorMarker = Marker(fullScreenMapView)
+        donorMarker.position = donorLocation
+        donorMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        donorMarker.title = "Food Location"
+        fullScreenMapView.overlays.add(donorMarker)
+
+        // Add user marker (if available)
+        if (userGeoPoint != null) {
+            val userMarker = Marker(fullScreenMapView)
+            userMarker.position = userGeoPoint!!
+            userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            userMarker.title = "Your Location"
+            fullScreenMapView.overlays.add(userMarker)
+
+            drawRoute(donorLocation, userGeoPoint!!)
+        }
 
         dialog.show()
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

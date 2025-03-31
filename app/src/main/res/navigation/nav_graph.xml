@@ -15,6 +15,11 @@
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
     <fragment
+        android:id="@+id/leaderBoardFragment2"
+        android:name="com.example.samarpan.Fragment.LeaderBoardFragment"
+        android:label="fragment_leader_board"
+        tools:layout="@layout/fragment_leader_board" />
+    <fragment
         android:id="@+id/searchFragment2"
         android:name="com.example.samarpan.Fragment.SearchFragment"
         android:label="fragment_search"

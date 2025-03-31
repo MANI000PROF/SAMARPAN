@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -23,18 +24,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SAMARPAN"
         tools:targetApi="31">
-        <activity
-            android:name=".Fragment.AddPostElectronicsBottomSheet"
-            android:exported="false" />
-        <activity
-            android:name=".Fragment.AddPostClothesBottomSheet"
-            android:exported="false" />
-        <activity
-            android:name=".Fragment.HomeFragmentElectronics"
-            android:exported="false" />
-        <activity
-            android:name=".Fragment.HomeFragmentClothes"
-            android:exported="false" />
 
         <meta-data
             android:name="androidx.camera.lifecycle.ProcessCameraProvider"
