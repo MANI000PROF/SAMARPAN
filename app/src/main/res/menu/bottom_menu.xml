@@ -10,7 +10,8 @@
         android:icon="@drawable/history"/>
     <item android:title="Leader Board"
         android:id="@+id/leaderBoardFragment2"
-        android:icon="@drawable/leader_board"/>
+        android:icon="@drawable/leader_board"
+        app:iconTint="@null"/>
     <item android:title="Search"
         android:id="@+id/searchFragment2"
         android:icon="@drawable/search"/>

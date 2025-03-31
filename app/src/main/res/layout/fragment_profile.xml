@@ -18,7 +18,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            app:contentScrim="@color/ic_launcher_background"
+            app:contentScrim="#AD9494"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
@@ -36,7 +36,8 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_collapseMode="parallax">
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.6">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/profileImageCard"

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "502712404175",
+    "firebase_url": "https://samarpan-42c86-default-rtdb.firebaseio.com",
     "project_id": "samarpan-42c86",
     "storage_bucket": "samarpan-42c86.firebasestorage.app"
   },
@@ -14,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "502712404175-dke4fgpjpp5bo63th8r8v1bsqgglsib1.apps.googleusercontent.com",
+          "client_id": "502712404175-f020ovls76br58tpaqgh8efqdv8n38n5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.samarpan",
-            "certificate_hash": "6af0626541be1dfd7b821b607460973c53ede17c"
+            "certificate_hash": "2fe5344c566a60101144d7cbb9305a580ab34391"
           }
         },
         {

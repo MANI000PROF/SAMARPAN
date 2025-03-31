@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white"
     tools:context=".Fragment.LeaderBoardFragment">
 
     <!-- Top Donor Section -->
@@ -54,16 +53,6 @@
             android:textColor="@color/black"/>
 
     </LinearLayout>
-
-    <!-- Graph Placeholder -->
-    <ImageView
-        android:id="@+id/donationGraph"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/graph_placeholder"
-        android:scaleType="fitCenter"
-        android:layout_margin="16dp"
-        android:background="@drawable/card_bg"/>
 
     <!-- Leaderboard List -->
     <androidx.recyclerview.widget.RecyclerView
