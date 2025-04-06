@@ -83,6 +83,9 @@ dependencies {
     // *Google ML Kit Object Detection (For food freshness classification)*
     implementation("com.google.mlkit:object-detection:17.0.1")
 
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.airbnb.android:lottie:6.1.0")
 
     // *CameraX Dependencies for Image Capture*
     implementation("androidx.camera:camera-core:1.3.0")

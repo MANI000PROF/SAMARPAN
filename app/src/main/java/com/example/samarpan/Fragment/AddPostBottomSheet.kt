@@ -268,16 +268,18 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
 
         if (postId != null) {
             val postDetails = mapOf(
+                "postId" to postId,
+                "donorId" to currentUserId,
                 "profileName" to name,
-                "location" to locationText,  // Keeping this for display
-                "latitude" to latitude,      // ✅ Storing latitude
-                "longitude" to longitude,    // ✅ Storing longitude
+                "location" to locationText,
+                "latitude" to latitude,
+                "longitude" to longitude,
                 "foodTitle" to foodTitle,
                 "foodDescription" to foodDescription,
                 "foodImage" to imageUrl,
-                "userId" to currentUserId,
                 "timestamp" to System.currentTimeMillis()
             )
+
 
             database.child(postId).setValue(postDetails).addOnCompleteListener {
                 if (it.isSuccessful) {

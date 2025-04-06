@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.samarpan.Model.Alert
 import com.example.samarpan.Model.DonationPosts
 import com.example.samarpan.R
 import com.example.samarpan.databinding.FragmentPostInfoBinding
@@ -76,31 +77,35 @@ class PostInfoFragment : Fragment() {
 
         // Handle "Request Food" button click
         binding.requestFoodBtn.setOnClickListener {
+            Log.d("RequestBtn", "Clicked!")
             sendFoodRequest()
         }
     }
 
     private fun sendFoodRequest() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            Toast.makeText(requireContext(), "You must be logged in to request food.", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
 
         val requesterId = currentUser.uid
-        val donorId = post.donorId ?: return
-        val postId = post.postId ?: return
+        val donorId = post.donorId
+        val postId = post.postId
 
-        val requestData = hashMapOf(
-            "postId" to postId,
-            "donorId" to donorId,
-            "requesterId" to requesterId,
-            "status" to "pending",
-            "timestamp" to System.currentTimeMillis()
-        )
+        if (donorId == null || postId == null) return
+
+        val alert = post.foodImage?.let {
+            Alert(
+                postId = postId,
+                donorId = donorId,
+                requesterId = requesterId,
+                status = "Pending", // Capitalize for consistency
+                timestamp = System.currentTimeMillis(),
+                message = "You have a new request on your post.",
+                title = "New Request",
+                postImageUrl = it
+            )
+        }
 
         val requestRef = FirebaseDatabase.getInstance().getReference("Requests").push()
-        requestRef.setValue(requestData)
+        requestRef.setValue(alert)
             .addOnSuccessListener {
                 binding.requestFoodBtn.isEnabled = false
                 binding.requestFoodBtn.text = "Request Sent"
@@ -110,6 +115,8 @@ class PostInfoFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to send request. Try again!", Toast.LENGTH_SHORT).show()
             }
     }
+
+
 
     private fun displayPostDetails() {
         binding.ProfileName.text = post.profileName ?: "Unknown User"

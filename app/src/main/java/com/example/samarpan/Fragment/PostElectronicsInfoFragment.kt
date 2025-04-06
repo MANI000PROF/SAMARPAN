@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.samarpan.Model.Alert
 import com.example.samarpan.Model.DonationPostsElectronics
 import com.example.samarpan.R
 import com.example.samarpan.databinding.FragmentPostElectronicsInfoBinding
@@ -81,26 +82,29 @@ class PostElectronicsInfoFragment : Fragment() {
     }
 
     private fun sendElectronicsRequest() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            Toast.makeText(requireContext(), "You must be logged in to request electronics.", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
 
         val requesterId = currentUser.uid
-        val donorId = post.donorId ?: return
-        val postId = post.postId ?: return
+        val donorId = post.donorId
+        val postId = post.postId
 
-        val requestData = hashMapOf(
-            "postId" to postId,
-            "donorId" to donorId,
-            "requesterId" to requesterId,
-            "status" to "pending",
-            "timestamp" to System.currentTimeMillis()
-        )
+        if (donorId == null || postId == null) return
+
+        val alert = post.electronicsImage?.let {
+            Alert(
+                postId = postId,
+                donorId = donorId,
+                requesterId = requesterId,
+                status = "Pending", // Capitalize for consistency
+                timestamp = System.currentTimeMillis(),
+                message = "You have a new request on your post.",
+                title = "New Request",
+                postImageUrl = it
+            )
+        }
 
         val requestRef = FirebaseDatabase.getInstance().getReference("Requests").push()
-        requestRef.setValue(requestData)
+        requestRef.setValue(alert)
             .addOnSuccessListener {
                 binding.requestElectronicsBtn.isEnabled = false
                 binding.requestElectronicsBtn.text = "Request Sent"

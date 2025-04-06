@@ -2,8 +2,10 @@ package com.example.samarpan.Fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,12 +22,9 @@ import com.example.samarpan.R
 import com.example.samarpan.databinding.ActivityHomeFragmentElectronicsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class HomeFragmentElectronics : Fragment() {
 
@@ -33,11 +32,14 @@ class HomeFragmentElectronics : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var database: DatabaseReference
-    private val postList = ArrayList<DonationPostsElectronics>()
-    private var fullPostList = ArrayList<DonationPostsElectronics>() // Store all posts before filtering
-    private lateinit var postAdapterElectronics: PostElectronicsAdapter
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var postAdapterElectronics: PostElectronicsAdapter
+
+    private val postList = ArrayList<DonationPostsElectronics>()
+    private val fullPostList = ArrayList<DonationPostsElectronics>()
+
     private var userLocation: Location? = null
+    private val cacheKey = "cachedElectronicsPosts"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,80 +49,84 @@ class HomeFragmentElectronics : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize location services
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        getUserLocation()
 
-        // Image slider setup
-        val imageList = ArrayList<SlideModel>()
-        imageList.add(SlideModel(R.drawable.donation1, ScaleTypes.CENTER_CROP))
-        imageList.add(SlideModel(R.drawable.donation5, ScaleTypes.CENTER_CROP))
-        imageList.add(SlideModel(R.drawable.donation6, ScaleTypes.CENTER_CROP))
-        binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
-
-        // RecyclerView setup
-        postAdapterElectronics = PostElectronicsAdapter(postList, userLocation) { selectedPost ->
-            openPostELectronicsInfoFragment(selectedPost)
+        // Initialize Adapter early
+        postAdapterElectronics = PostElectronicsAdapter(postList, userLocation) {
+            openPostElectronicsInfoFragment(it)
         }
-
         binding.postRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.postRecyclerView.adapter = postAdapterElectronics
 
-        database = FirebaseDatabase.getInstance().getReference("DonationPostsElectronics")
+        // Image slider
+        val imageList = arrayListOf(
+            SlideModel(R.drawable.donation1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation5, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation6, ScaleTypes.CENTER_CROP)
+        )
+        binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
 
-        // Load Posts from Firebase
-        loadPosts()
+        // Location → then data
+        getUserLocation {
+            if (isInternetAvailable()) loadPosts() else loadFromCache()
+        }
 
-        // Filter Button Functionality
+        // Swipe to refresh
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (isInternetAvailable()) {
+                loadPosts()
+            } else {
+                binding.swipeRefreshLayout.isRefreshing = false
+                loadFromCache()
+            }
+        }
 
+        // Filter button
         binding.filterBtn.setOnClickListener {
             val location = binding.locationEditText.text.toString().trim()
             if (location.isEmpty()) {
-                postAdapterElectronics.updatePostList(fullPostList, userLocation) // Restore full list
+                postAdapterElectronics.updatePostList(fullPostList, userLocation)
             } else {
-                val filteredPosts = fullPostList.filter { it.location?.contains(location, ignoreCase = true) ?: false }
-                postAdapterElectronics.updatePostList(filteredPosts, userLocation)
+                val filtered = fullPostList.filter {
+                    it.location?.contains(location, ignoreCase = true) ?: false
+                }
+                postAdapterElectronics.updatePostList(filtered, userLocation)
             }
         }
 
-
-        // Add Post Button
+        // Add Post
         binding.addPostBtn.setOnClickListener {
-            val addPostElectronicsBottomSheet = AddPostElectronicsBottomSheet()
-            addPostElectronicsBottomSheet.show(parentFragmentManager, "AddPostElectronicsBottomSheet")
+            AddPostElectronicsBottomSheet().show(parentFragmentManager, "AddPostElectronicsBottomSheet")
         }
-
     }
-
-    override fun onResume() {
-        super.onResume()
-        loadPosts() // Reload posts when fragment is visible again
-    }
-
 
     @SuppressLint("MissingPermission")
-    private fun getUserLocation() {
+    private fun getUserLocation(onReady: () -> Unit) {
         if (ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    userLocation = location
-                    postAdapterElectronics.updatePostList(postList, userLocation) // Update with location
-                }
+                userLocation = location
+                postAdapterElectronics.updatePostList(postList, userLocation)
+                onReady()
             }
         } else {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            onReady()
         }
     }
 
-
     private fun loadPosts() {
-        database.addValueEventListener(object : ValueEventListener {
+        binding.swipeRefreshLayout.isRefreshing = true
+        database = FirebaseDatabase.getInstance().getReference("DonationPostsElectronics")
+
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 postList.clear()
                 for (dataSnapshot in snapshot.children) {
@@ -129,59 +135,77 @@ class HomeFragmentElectronics : Fragment() {
                 }
 
                 fullPostList.clear()
-                fullPostList.addAll(postList) // Store original data
+                fullPostList.addAll(postList)
 
                 sortPostsByDistance()
 
-                if (postList.isEmpty()) {
-                    binding.noPostsTextView.visibility = View.VISIBLE
-                    binding.postRecyclerView.visibility = View.GONE
-                } else {
-                    binding.noPostsTextView.visibility = View.GONE
-                    binding.postRecyclerView.visibility = View.VISIBLE
-                }
+                binding.noPostsTextView.visibility =
+                    if (postList.isEmpty()) View.VISIBLE else View.GONE
+                binding.postRecyclerView.visibility =
+                    if (postList.isEmpty()) View.GONE else View.VISIBLE
 
-                postAdapterElectronics.notifyDataSetChanged()
+                postAdapterElectronics.updatePostList(postList, userLocation)
+                saveToCache(postList)
+                binding.swipeRefreshLayout.isRefreshing = false
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle database error
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         })
     }
 
     private fun sortPostsByDistance() {
-        if (userLocation != null) {
-            postList.sortBy { post ->
-                val postLocation = Location("").apply {
-                    latitude = post.latitude ?: 0.0
-                    longitude = post.longitude ?: 0.0
+        userLocation?.let { userLoc ->
+            postList.sortBy {
+                val loc = Location("").apply {
+                    latitude = it.latitude ?: 0.0
+                    longitude = it.longitude ?: 0.0
                 }
-                userLocation!!.distanceTo(postLocation)
+                userLoc.distanceTo(loc)
             }
         }
     }
 
-    private fun openPostELectronicsInfoFragment(selectedPost: DonationPostsElectronics) {
+    private fun loadFromCache() {
+        val prefs = requireContext().getSharedPreferences("ElectronicsCache", Context.MODE_PRIVATE)
+        val json = prefs.getString(cacheKey, null)
+        if (!json.isNullOrEmpty()) {
+            val type = object : TypeToken<List<DonationPostsElectronics>>() {}.type
+            val cached = Gson().fromJson<List<DonationPostsElectronics>>(json, type)
+
+            postList.clear()
+            postList.addAll(cached)
+
+            fullPostList.clear()
+            fullPostList.addAll(cached)
+
+            sortPostsByDistance()
+            postAdapterElectronics.updatePostList(postList, userLocation)
+
+            binding.noPostsTextView.visibility =
+                if (postList.isEmpty()) View.VISIBLE else View.GONE
+            binding.postRecyclerView.visibility =
+                if (postList.isEmpty()) View.GONE else View.VISIBLE
+        }
+    }
+
+    private fun saveToCache(posts: List<DonationPostsElectronics>) {
+        val prefs = requireContext().getSharedPreferences("ElectronicsCache", Context.MODE_PRIVATE)
+        val json = Gson().toJson(posts)
+        prefs.edit().putString(cacheKey, json).apply()
+    }
+
+    private fun isInternetAvailable(): Boolean {
+        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return cm.activeNetworkInfo?.isConnectedOrConnecting == true
+    }
+
+    private fun openPostElectronicsInfoFragment(selectedPost: DonationPostsElectronics) {
         val bundle = Bundle().apply {
             putSerializable("post_data", selectedPost)
         }
         findNavController().navigate(R.id.action_homeFragment2_to_postElectronicsInfoFragment, bundle)
-    }
-
-    private fun addPostToFirebase(post: DonationPostsElectronics) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        val postId = database.push().key ?: return
-        val updatedPost = post.copy(donorId = currentUserId)
-
-        database.child(postId).setValue(updatedPost).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                postList.add(updatedPost)
-                postAdapterElectronics.notifyItemInserted(postList.size - 1)
-                binding.noPostsTextView.visibility = View.GONE
-                binding.postRecyclerView.visibility = View.VISIBLE
-            }
-        }
     }
 
     override fun onDestroyView() {
@@ -189,4 +213,3 @@ class HomeFragmentElectronics : Fragment() {
         _binding = null
     }
 }
-

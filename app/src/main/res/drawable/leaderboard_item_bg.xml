@@ -4,7 +4,7 @@
 
     <corners android:radius="12dp" />
 
-    <solid android:color="@color/leaderboard_item_bg" />
+    <solid android:color="#0D174188" />
 
     <padding
         android:left="10dp"

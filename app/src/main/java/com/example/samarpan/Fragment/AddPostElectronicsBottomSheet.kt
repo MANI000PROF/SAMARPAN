@@ -264,6 +264,8 @@ class AddPostElectronicsBottomSheet : BottomSheetDialogFragment() {
 
         if (postId != null) {
             val postDetails = mapOf(
+                "postId" to postId,
+                "donorId" to currentUserId,
                 "profileName" to name,
                 "location" to locationText,  // Keeping this for display
                 "latitude" to latitude,      // ✅ Storing latitude
@@ -271,7 +273,6 @@ class AddPostElectronicsBottomSheet : BottomSheetDialogFragment() {
                 "electronicsTitle" to electronicsTitle,
                 "electronicsDescription" to electronicsDescription,
                 "electronicsImage" to imageUrl,
-                "userId" to currentUserId,
                 "timestamp" to System.currentTimeMillis()
             )
 
