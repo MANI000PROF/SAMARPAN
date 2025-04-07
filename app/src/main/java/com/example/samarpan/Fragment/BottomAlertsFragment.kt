@@ -1,7 +1,6 @@
 package com.example.samarpan.Fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +30,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
         alertList = mutableListOf()
         alertAdapter = AlertAdapter(alertList)
         binding.alertRecyclerView.adapter = alertAdapter
-        binding.alertRecyclerView.layoutManager = LinearLayoutManager(requireContext()) // <- ADD THIS
+        binding.alertRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         fetchUserAlerts()
 
@@ -47,15 +46,21 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                 alertList.clear()
                 for (requestSnapshot in snapshot.children) {
                     val alert = requestSnapshot.getValue(Alert::class.java)
-                    if (alert?.donorId == currentUserId) {
-                        val alertWithId = alert.copy(requestId = requestSnapshot.key) // Add the push ID
+                    if (
+                        alert?.donorId == currentUserId &&
+                        alert.status != "Declined"
+                    ) {
+                        val alertWithId = alert.copy(requestId = requestSnapshot.key)
                         alertList.add(alertWithId)
                     }
                 }
+
                 if (alertList.isEmpty()) {
+                    binding.noAlertsAnimation.visibility = View.VISIBLE
                     binding.noAlertsTextView.visibility = View.VISIBLE
                     binding.alertRecyclerView.visibility = View.GONE
                 } else {
+                    binding.noAlertsAnimation.visibility = View.GONE
                     binding.noAlertsTextView.visibility = View.GONE
                     binding.alertRecyclerView.visibility = View.VISIBLE
                 }
@@ -64,11 +69,10 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle error (optional)
+                // Optionally handle error
             }
         })
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

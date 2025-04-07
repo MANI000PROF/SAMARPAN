@@ -37,7 +37,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/alert_item" />
 
-        <!-- Vertical Guideline at 40% -->
+        <!-- Guideline -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideCenterY"
             android:layout_width="wrap_content"
@@ -45,18 +45,31 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.4" />
 
-        <!-- No Alerts Message -->
+        <!-- Lottie Animation for No Alerts -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/noAlertsAnimation"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:visibility="gone"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/waiting_alerts"
+            app:layout_constraintTop_toBottomOf="@id/textView9"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- No Alerts Text -->
         <TextView
             android:id="@+id/noAlertsTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No alerts found."
+            android:text="No requests yet. Please be patient..."
             android:textSize="16sp"
             android:textColor="@android:color/darker_gray"
             android:fontFamily="sans-serif"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/textView9"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/noAlertsAnimation"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

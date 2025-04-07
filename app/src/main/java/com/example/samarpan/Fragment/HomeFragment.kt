@@ -208,15 +208,18 @@ class HomeFragment : Fragment() {
     private fun updateUI(list: List<DonationPosts>) {
         if (list.isEmpty()) {
             binding.noPostsTextView.visibility = View.VISIBLE
+            binding.noPostsAnimation.visibility = View.VISIBLE
             binding.postRecyclerView.visibility = View.GONE
         } else {
             binding.noPostsTextView.visibility = View.GONE
+            binding.noPostsAnimation.visibility = View.GONE
             binding.postRecyclerView.visibility = View.VISIBLE
         }
 
         postAdapter.updatePostList(list, userLocation)
         postAdapter.notifyDataSetChanged()
     }
+
 
     private fun isConnectedToInternet(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

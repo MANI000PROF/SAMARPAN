@@ -22,7 +22,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class SearchFragment : Fragment() {
-
+    private lateinit var emptyAnimationView: com.airbnb.lottie.LottieAnimationView
+    private lateinit var noDataTextView: android.widget.TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var searchAdapter: SearchAdapter
     private val unifiedList = mutableListOf<UnifiedPost>()
@@ -47,6 +48,9 @@ class SearchFragment : Fragment() {
         searchAdapter = SearchAdapter(filteredList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         recyclerView.adapter = searchAdapter
+
+        emptyAnimationView = view.findViewById(R.id.noResultsAnimation)
+        noDataTextView = view.findViewById(R.id.noDataTextView)
 
         swipeRefreshLayout.setOnRefreshListener {
             if (isInternetAvailable()) {
@@ -190,6 +194,10 @@ class SearchFragment : Fragment() {
             })
         }
         searchAdapter.updateList(filteredList)
+
+        // 🎯 Show or hide Lottie animation
+        emptyAnimationView.visibility = if (filteredList.isEmpty()) View.VISIBLE else View.GONE
+        noDataTextView.visibility = if (filteredList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun isInternetAvailable(): Boolean {

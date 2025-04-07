@@ -145,12 +145,14 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showNoPosts() {
-        binding.donationPostImg.visibility = View.VISIBLE
+        binding.noDonationsAnimation.visibility = View.VISIBLE
+        binding.noDonationsTextView.visibility = View.VISIBLE
         binding.historyRecyclerView.visibility = View.GONE
     }
 
     private fun showPosts() {
-        binding.donationPostImg.visibility = View.GONE
+        binding.noDonationsTextView.visibility = View.GONE
+        binding.noDonationsAnimation.visibility = View.GONE
         binding.historyRecyclerView.visibility = View.VISIBLE
     }
 
