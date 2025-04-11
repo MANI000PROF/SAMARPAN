@@ -51,7 +51,6 @@ dependencies {
     // Firebase Dependencies
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.storage.ktx)
     implementation(platform(libs.firebase.bom))
 
     implementation(libs.play.services.auth)
@@ -62,6 +61,7 @@ dependencies {
     implementation(libs.play.services.cast.tv)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.compose.material)
+    implementation(libs.google.firebase.storage.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

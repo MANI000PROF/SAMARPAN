@@ -93,7 +93,9 @@ class SignUpActivity : AppCompatActivity() {
             "id" to userId,
             "fullName" to fullName,
             "email" to email,
-            "mobile" to mobile
+            "mobile" to mobile,
+            "profileImageUrl" to null, // Email sign-ups won't have one
+            "score" to 0
         )
 
         userRef.setValue(user).addOnCompleteListener { task ->

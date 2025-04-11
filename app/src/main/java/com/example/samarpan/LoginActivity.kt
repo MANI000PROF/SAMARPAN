@@ -18,6 +18,7 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -138,6 +139,29 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    if (user != null) {
+                        val database = FirebaseDatabase.getInstance().reference
+                        val userRef = database.child("users").child(user.uid)
+
+                        // Check if user already exists in database
+                        userRef.get().addOnSuccessListener { snapshot ->
+                            if (!snapshot.exists()) {
+                                val newUser = mapOf(
+                                    "id" to user.uid,
+                                    "fullName" to user.displayName,
+                                    "email" to user.email,
+                                    "profileImageUrl" to user.photoUrl?.toString(),
+                                    "mobile" to user.phoneNumber,
+                                    "score" to 0 // Change default if needed
+                                )
+                                userRef.setValue(newUser)
+                            }
+                        }.addOnFailureListener {
+                            Toast.makeText(this, "Failed to check user in database: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
                     Toast.makeText(this, "Sign in successful", Toast.LENGTH_SHORT).show()
                     navigateToMainActivity()
                 } else {
@@ -145,6 +169,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
     }
+
 
     private fun togglePasswordVisibility() {
         isPasswordVisible = !isPasswordVisible

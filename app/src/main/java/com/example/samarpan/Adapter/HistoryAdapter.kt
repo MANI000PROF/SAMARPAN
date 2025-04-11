@@ -8,25 +8,26 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.samarpan.Model.DonationPosts
+import com.example.samarpan.Model.UnifiedPost
 import com.example.samarpan.R
 
 class HistoryAdapter(
     private val context: Context,
-    private val postList: List<DonationPosts>
+    private val postList: List<UnifiedPost>
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    private var onItemLongClick: ((DonationPosts) -> Unit)? = null
+    private var onItemLongClick: ((UnifiedPost) -> Unit)? = null
 
-    fun setOnItemLongClickListener(listener: (DonationPosts) -> Unit) {
+    fun setOnItemLongClickListener(listener: (UnifiedPost) -> Unit) {
         onItemLongClick = listener
     }
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val foodImage: ImageView = itemView.findViewById(R.id.foodImage)
+        val imageView: ImageView = itemView.findViewById(R.id.foodImage)
         val profileName: TextView = itemView.findViewById(R.id.profileName)
         val location: TextView = itemView.findViewById(R.id.location)
-        val foodTitle: TextView = itemView.findViewById(R.id.foodTitle)
+        val title: TextView = itemView.findViewById(R.id.foodTitle) // You can rename in XML later if needed
+        val category: TextView = itemView.findViewById(R.id.categoryTextView) // Optional: show category tag
 
         init {
             itemView.setOnLongClickListener {
@@ -45,14 +46,18 @@ class HistoryAdapter(
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val post = postList[position]
         holder.profileName.text = post.profileName ?: "Unknown"
-        holder.location.text = post.location ?: "Not Specified"
-        holder.foodTitle.text = post.foodTitle ?: "No Title"
+        holder.location.text = post.location ?: "No location"
+        holder.title.text = post.title ?: "No Title"
+
+        // Optional: show post category
+        holder.category.text = post.category ?: ""
 
         Glide.with(context)
-            .load(post.foodImage ?: R.drawable.placeholder)
-            .into(holder.foodImage)
+            .load(post.imageUrl)
+            .placeholder(R.drawable.placeholder)
+            .error(R.drawable.placeholder)
+            .into(holder.imageView)
     }
 
     override fun getItemCount(): Int = postList.size
 }
-

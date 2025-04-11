@@ -40,7 +40,7 @@ class HomeFragmentElectronics : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var userLocation: Location? = null
 
-    private val sharedPrefsKey = "cached_clothes_posts"
+    private val sharedPrefsKey = "cached_electronics_posts"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

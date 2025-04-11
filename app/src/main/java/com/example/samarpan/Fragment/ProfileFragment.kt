@@ -2,6 +2,7 @@ package com.example.samarpan.Fragment
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -13,17 +14,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.UploadCallback
+import com.cloudinary.android.policy.GlobalUploadPolicy
+import com.cloudinary.android.policy.UploadPolicy
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.database.FirebaseDatabase
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.abs
 
 class ProfileFragment : Fragment() {
@@ -36,8 +42,7 @@ class ProfileFragment : Fragment() {
     private lateinit var userEmailTextView: TextView
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
+    private val dbRef = FirebaseDatabase.getInstance().reference
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +60,7 @@ class ProfileFragment : Fragment() {
         (requireActivity() as AppCompatActivity).setSupportActionBar(toolbar)
         setHasOptionsMenu(true)
 
+        initCloudinary()
         loadUserProfile()
 
         profileImage.setOnClickListener {
@@ -63,10 +69,9 @@ class ProfileFragment : Fragment() {
 
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             val percentage = abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
-            val minScale = 0.4f  // Ensure profile image doesn't shrink too much
             val scale = 1 - (percentage * 0.6f)
+            val minScale = 0.4f
             val adjustedScale = if (scale < minScale) minScale else scale
-
             profileImageCard.scaleX = adjustedScale
             profileImageCard.scaleY = adjustedScale
 
@@ -77,6 +82,23 @@ class ProfileFragment : Fragment() {
         })
 
         return view
+    }
+
+    private fun initCloudinary() {
+        try {
+            MediaManager.get()
+        } catch (e: IllegalStateException) {
+            val config: MutableMap<String, String> = HashMap()
+            config["cloud_name"] = "dwkkfinda"
+            config["api_key"] = "316841239362936"
+            config["api_secret"] = "6Hlnwg4rEfE4-ytS_WrgP5tpySs"
+
+            MediaManager.init(requireContext(), config)
+            MediaManager.get().globalUploadPolicy = GlobalUploadPolicy.Builder()
+                .maxConcurrentRequests(4)
+                .networkPolicy(UploadPolicy.NetworkType.ANY)
+                .build()
+        }
     }
 
     private fun loadUserProfile() {
@@ -105,13 +127,13 @@ class ProfileFragment : Fragment() {
     }
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { uploadProfileImage(it) }
+        uri?.let { uploadImageToCloudinary(it) }
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            uri?.let { uploadProfileImage(it) }
+            val bitmap = result.data?.extras?.get("data") as? Bitmap
+            bitmap?.let { saveTempBitmapAndUpload(it) }
         }
     }
 
@@ -124,42 +146,68 @@ class ProfileFragment : Fragment() {
         cameraLauncher.launch(intent)
     }
 
-    private fun uploadProfileImage(imageUri: Uri) {
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.let {
-            val storageRef = FirebaseStorage.getInstance().reference
-                .child("profile_images/${user.uid}.jpg")
-
-            val databaseReference = FirebaseDatabase.getInstance().reference // Initialize it properly
-
-            storageRef.putFile(imageUri)
-                .addOnSuccessListener { taskSnapshot ->
-                    storageRef.downloadUrl.addOnSuccessListener { uri ->
-                        val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setPhotoUri(uri)
-                            .build()
-
-                        user.updateProfile(profileUpdates)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    // Update in Firebase Database
-                                    databaseReference.child("users").child(user.uid)
-                                        .child("profileImageUrl").setValue(uri.toString())
-
-                                    // Update UI
-                                    Glide.with(requireContext()).load(uri).into(profileImage)
-                                    Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                    }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Upload failed!", Toast.LENGTH_SHORT).show()
-                }
+    private fun saveTempBitmapAndUpload(bitmap: Bitmap) {
+        val tempFile = File(requireContext().cacheDir, "temp_profile_image.jpg")
+        try {
+            FileOutputStream(tempFile).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+            }
+            uploadImageToCloudinary(tempFile.absolutePath)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to save image.", Toast.LENGTH_SHORT).show()
         }
     }
 
+    private fun uploadImageToCloudinary(imagePathOrUri: Any) {
+        val uploadRequest = when (imagePathOrUri) {
+            is Uri -> MediaManager.get().upload(imagePathOrUri)
+            is String -> MediaManager.get().upload(imagePathOrUri)
+            else -> return
+        }
 
+        uploadRequest.callback(object : UploadCallback {
+            override fun onStart(requestId: String?) {
+                Toast.makeText(context, "Uploading image...", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+
+            override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
+                val imageUrl = resultData?.get("url") as? String
+                imageUrl?.let {
+                    updateFirebaseProfile(it)
+                }
+            }
+
+            override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
+                Toast.makeText(context, "Upload failed: ${error?.description}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
+        }).dispatch()
+    }
+
+    private fun updateFirebaseProfile(imageUrl: String) {
+        val user = auth.currentUser ?: return
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setPhotoUri(Uri.parse(imageUrl))
+            .build()
+
+        user.updateProfile(profileUpdates).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Update in Firebase Realtime Database
+                dbRef.child("users").child(user.uid)
+                    .child("profileImageUrl").setValue(imageUrl)
+
+                // Update UI
+                Glide.with(this).load(imageUrl).into(profileImage)
+                Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Profile update failed!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_profile, menu)
@@ -169,7 +217,6 @@ class ProfileFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> {
-                // TODO: Open settings screen
                 true
             }
             R.id.action_logout -> {
@@ -193,5 +240,4 @@ class ProfileFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
 }
