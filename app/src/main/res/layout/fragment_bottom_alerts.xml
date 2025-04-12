@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="@drawable/bottom_sheet_background"
     tools:context=".Fragment.BottomAlertsFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,7 +18,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Alerts"
-            android:textColor="#000000"
             android:textSize="18sp"
             android:fontFamily="sans-serif-medium"
             app:layout_constraintTop_toTopOf="parent"

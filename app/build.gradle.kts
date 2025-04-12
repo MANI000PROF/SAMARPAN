@@ -86,6 +86,9 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.airbnb.android:lottie:6.1.0")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
 
     // *CameraX Dependencies for Image Capture*
     implementation("androidx.camera:camera-core:1.3.0")
@@ -93,6 +96,7 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.0")
 
     implementation("com.cloudinary:cloudinary-android:3.0.2")
+
 
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("com.google.android.gms:play-services-maps:18.0.0")

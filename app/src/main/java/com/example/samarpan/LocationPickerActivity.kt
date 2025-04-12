@@ -20,7 +20,10 @@ class LocationPickerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_picker)
-
+        val topAppBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.topAppBar)
+        topAppBar.setNavigationOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
         // Initialize OSM settings
         Configuration.getInstance().load(this, getSharedPreferences("osm_prefs", MODE_PRIVATE))
 

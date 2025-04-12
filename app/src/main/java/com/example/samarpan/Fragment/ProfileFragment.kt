@@ -23,6 +23,7 @@ import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
+import com.example.samarpan.SettingsActivity
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -217,6 +218,8 @@ class ProfileFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> {
+                val intent = Intent(requireContext(), SettingsActivity::class.java)
+                startActivity(intent)
                 true
             }
             R.id.action_logout -> {

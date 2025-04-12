@@ -11,6 +11,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -34,8 +36,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this) // Apply stored theme before setting content view
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val appName = findViewById<TextView>(R.id.textView4)
+        appName.alpha = 0f
+        appName.translationY = -30f
+        appName.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(600)
+            .setStartDelay(150)
+            .start()
+
+        val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons)
+        iconsLayout.alpha = 0f
+        iconsLayout.translationY = 50f
+        iconsLayout.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(600)
+            .setStartDelay(200)
+            .start()
 
         checkNotificationPermission()
 
@@ -44,6 +67,9 @@ class MainActivity : AppCompatActivity() {
 
         // Set up BottomNavigationView with NavController
         val bottomNav: BottomNavigationView = findViewById(R.id.bottomNavigationView)
+        bottomNav.translationY = 300f
+        bottomNav.alpha = 0f
+        bottomNav.animate().translationY(0f).alpha(1f).setDuration(500).start()
         bottomNav.setupWithNavController(navController)
 
         // Handle bottom menu item selection

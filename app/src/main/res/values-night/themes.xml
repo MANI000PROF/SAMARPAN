@@ -2,6 +2,14 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SAMARPAN" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">#E68A69</item>
+        <item name="colorPrimaryVariant">#643322</item>
+        <item name="colorAccent">#643322</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="popupMenuStyle">@style/CustomPopupMenu</item>
+    </style>
+    <style name="CustomPopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_rounded</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 </resources>

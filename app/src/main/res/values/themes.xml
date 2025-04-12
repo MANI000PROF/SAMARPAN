@@ -2,8 +2,16 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SAMARPAN" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#D0A190</item>
+        <item name="colorPrimaryVariant">#A0705F</item>
+        <item name="colorAccent">#A47362</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="popupMenuStyle">@style/CustomPopupMenu</item>
     </style>
 
     <style name="Theme.SAMARPAN" parent="Base.Theme.SAMARPAN" />
+    <style name="CustomPopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_rounded</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
 </resources>

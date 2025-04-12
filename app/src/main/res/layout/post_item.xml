@@ -36,7 +36,6 @@
                 android:textSize="15sp"
                 android:layout_marginTop="5dp"
                 android:textStyle="bold|normal"
-                android:textColor="#12206D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
@@ -46,7 +45,6 @@
                 android:textSize="14sp"
                 android:layout_marginTop="5dp"
                 android:textStyle="normal"
-                android:textColor="#12206D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -67,10 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/food_title"
-                android:textColor="#12206D"
                 android:textSize="13sp" />
-
-
 
         </LinearLayout>
 
