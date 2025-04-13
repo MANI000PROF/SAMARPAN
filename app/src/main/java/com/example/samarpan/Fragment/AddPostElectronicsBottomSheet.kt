@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -143,7 +144,11 @@ class AddPostElectronicsBottomSheet : BottomSheetDialogFragment() {
         if (requestCode == LOCATION_PICKER_REQUEST && resultCode == Activity.RESULT_OK) {
             val latitude = data?.getDoubleExtra("latitude", 0.0) ?: 0.0
             val longitude = data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-            inputLocation.setText("Lat: $latitude, Lon: $longitude")
+            // ✅ Get address string from coordinates
+            val locationName = getAddressFromCoordinates(latitude, longitude)
+
+            // ✅ Fill the location input with readable name
+            inputLocation.setText(locationName)
         }
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
@@ -245,6 +250,26 @@ class AddPostElectronicsBottomSheet : BottomSheetDialogFragment() {
             Toast.makeText(context, "Failed to prepare image for upload", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun getAddressFromCoordinates(latitude: Double, longitude: Double): String {
+        val geocoder = Geocoder(requireContext())
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses != null && addresses.isNotEmpty()) {
+                val address = addresses[0]
+                val locality = address.locality ?: ""
+                val subLocality = address.subLocality ?: ""
+                val featureName = address.featureName ?: ""
+                listOfNotNull(featureName, subLocality, locality).joinToString(", ")
+            } else {
+                "Unknown Location"
+            }
+        } catch (e: Exception) {
+            Log.e("Geocoder", "Error getting address: ${e.message}")
+            "Unknown Location"
+        }
+    }
+
 
     private fun postFoodDetails() {
         val name = inputProfileName.text.toString()

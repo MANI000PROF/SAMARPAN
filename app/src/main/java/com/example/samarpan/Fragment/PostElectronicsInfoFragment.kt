@@ -1,6 +1,7 @@
 package com.example.samarpan.Fragment
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,12 +12,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.samarpan.FullScreenMapActivity
 import com.example.samarpan.Model.Alert
 import com.example.samarpan.Model.DonationPostsElectronics
 import com.example.samarpan.R
 import com.example.samarpan.databinding.FragmentPostElectronicsInfoBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import org.json.JSONObject
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -26,6 +29,8 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.net.HttpURLConnection
+import java.net.URL
 
 class PostElectronicsInfoFragment : Fragment() {
 
@@ -69,8 +74,7 @@ class PostElectronicsInfoFragment : Fragment() {
         setupOSMMap()
 
         // Expand Map on Click
-        binding.cardView3.setOnClickListener {
-            Log.d("PostElectronicsInfoFragment", "CardView clicked!") // 🔴 Debugging log
+        binding.mapHintText.setOnClickListener {
             showFullScreenMap()
         }
 
@@ -174,47 +178,56 @@ class PostElectronicsInfoFragment : Fragment() {
     }
 
     private fun drawRoute(start: GeoPoint, end: GeoPoint) {
-        val polyline = Polyline()
-        polyline.addPoint(start)
-        polyline.addPoint(end)
-        polyline.color = resources.getColor(R.color.route_color, null)
-        polyline.width = 8f
+        val url = "https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248c120dbeecf954883b4f3e262894a07c1&start=${start.longitude},${start.latitude}&end=${end.longitude},${end.latitude}"
 
-        mapView.overlays.add(polyline)
-        mapView.invalidate()
+        Thread {
+            try {
+                val connection = URL(url).openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                val response = connection.inputStream.bufferedReader().use { it.readText() }
+
+                val json = JSONObject(response)
+                val coordinates = json
+                    .getJSONArray("features")
+                    .getJSONObject(0)
+                    .getJSONObject("geometry")
+                    .getJSONArray("coordinates")
+
+                val roadPoints = mutableListOf<GeoPoint>()
+                for (i in 0 until coordinates.length()) {
+                    val coord = coordinates.getJSONArray(i)
+                    val lon = coord.getDouble(0)
+                    val lat = coord.getDouble(1)
+                    roadPoints.add(GeoPoint(lat, lon))
+                }
+
+                activity?.runOnUiThread {
+                    val polyline = Polyline()
+                    polyline.setPoints(roadPoints)
+                    polyline.color = resources.getColor(R.color.route_color, null)
+                    polyline.width = 8f
+                    mapView.overlays.add(polyline)
+                    mapView.invalidate()
+                }
+            } catch (e: Exception) {
+                Log.e("RouteError", "Failed to get route", e)
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "No route found!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
+
     private fun showFullScreenMap() {
-        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        dialog.setContentView(R.layout.dialog_fullscreen_map)
-
-        val fullScreenMapView = dialog.findViewById<MapView>(R.id.fullScreenMapView)
-        fullScreenMapView.setTileSource(TileSourceFactory.MAPNIK)
-        fullScreenMapView.setMultiTouchControls(true)
-
-        val donorLocation = GeoPoint(latitude, longitude)
-        fullScreenMapView.controller.setZoom(15.0)
-        fullScreenMapView.controller.setCenter(donorLocation)
-
-        // Add donor marker
-        val donorMarker = Marker(fullScreenMapView)
-        donorMarker.position = donorLocation
-        donorMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        donorMarker.title = "Electronics Location"
-        fullScreenMapView.overlays.add(donorMarker)
-
-        // Add user marker (if available)
-        if (userGeoPoint != null) {
-            val userMarker = Marker(fullScreenMapView)
-            userMarker.position = userGeoPoint!!
-            userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            userMarker.title = "Your Location"
-            fullScreenMapView.overlays.add(userMarker)
-
-            drawRoute(donorLocation, userGeoPoint!!)
+        val intent = Intent(requireContext(), FullScreenMapActivity::class.java)
+        intent.putExtra("latitude", latitude)
+        intent.putExtra("longitude", longitude)
+        userGeoPoint?.let {
+            intent.putExtra("user_lat", it.latitude)
+            intent.putExtra("user_lng", it.longitude)
         }
-
-        dialog.show()
+        startActivity(intent)
     }
 
 
