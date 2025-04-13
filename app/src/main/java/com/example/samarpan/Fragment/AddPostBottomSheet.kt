@@ -48,6 +48,8 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
     private lateinit var postButton: AppCompatButton
     private lateinit var cancelButton: AppCompatButton
     private lateinit var locationBtn: AppCompatButton
+    private var selectedLatitude: Double = 0.0
+    private var selectedLongitude: Double = 0.0
 
     private var imageUri: Uri? = null
     private var cloudinaryImageUrl: String? = null
@@ -142,14 +144,12 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOCATION_PICKER_REQUEST && resultCode == Activity.RESULT_OK) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0) ?: 0.0
-            val longitude = data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-            // ✅ Get address string from coordinates
-            val locationName = getAddressFromCoordinates(latitude, longitude)
-
-            // ✅ Fill the location input with readable name
+            selectedLatitude = data?.getDoubleExtra("latitude", 0.0) ?: 0.0
+            selectedLongitude = data?.getDoubleExtra("longitude", 0.0) ?: 0.0
+            val locationName = getAddressFromCoordinates(selectedLatitude, selectedLongitude)
             inputLocation.setText(locationName)
         }
+
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             val bitmap = data?.extras?.get("data") as? Bitmap
@@ -286,10 +286,10 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
 
         // ✅ Extract latitude and longitude from location text
         val latLngPattern = "Lat: (-?\\d+\\.\\d+), Lon: (-?\\d+\\.\\d+)".toRegex()
-        val matchResult = latLngPattern.find(locationText)
+        latLngPattern.find(locationText)
 
-        val latitude = matchResult?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
-        val longitude = matchResult?.groupValues?.get(2)?.toDoubleOrNull() ?: 0.0
+        val latitude = selectedLatitude
+        val longitude = selectedLongitude
 
         if (postId != null) {
             val postDetails = mapOf(

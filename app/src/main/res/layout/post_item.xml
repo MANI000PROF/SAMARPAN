@@ -16,6 +16,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:background="@drawable/bg_popup_rounded"
             android:id="@+id/foodImage"
             android:layout_width="100dp"
             android:layout_height="100dp"

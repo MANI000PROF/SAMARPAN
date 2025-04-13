@@ -11,10 +11,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.samarpan.Fragment.MenuFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +36,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun highlightCategory(active: Int) {
+        val foodBtn = findViewById<ImageView>(R.id.foodBtn)
+        val clothesBtn = findViewById<ImageView>(R.id.clothesBtn)
+        val electronicsBtn = findViewById<ImageView>(R.id.electronicsBtn)
+
+        val activeColor = ContextCompat.getColor(this, R.color.teal_700)
+        val defaultColor = ContextCompat.getColor(this, R.color.colorPrimary)
+
+        foodBtn.setColorFilter(if (active == R.id.homeFragment2) activeColor else defaultColor)
+        clothesBtn.setColorFilter(if (active == R.id.homeFragmentClothes) activeColor else defaultColor)
+        electronicsBtn.setColorFilter(if (active == R.id.homeFragmentElectronics) activeColor else defaultColor)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this) // Apply stored theme before setting content view
@@ -65,6 +81,10 @@ class MainActivity : AppCompatActivity() {
         // Initialize NavController
         navController = findNavController(R.id.fragmentContainerView4)
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            highlightCategory(destination.id)
+        }
+
         // Set up BottomNavigationView with NavController
         val bottomNav: BottomNavigationView = findViewById(R.id.bottomNavigationView)
         bottomNav.translationY = 300f
@@ -90,18 +110,27 @@ class MainActivity : AppCompatActivity() {
             bottomSheet.show(supportFragmentManager, "BottomAlertsFragment")
         }
 
+        findViewById<View>(R.id.menuBtn).setOnClickListener {
+            val sideMenu = MenuFragment()
+            sideMenu.show(supportFragmentManager, "MenuFragment")
+        }
+
+
         // Category buttons navigation (Keep "Home" highlighted)
         findViewById<View>(R.id.foodBtn).setOnClickListener {
             navController.navigate(R.id.homeFragment2)  // Open HomeFragment (Food)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true // Keep Home highlighted
+            highlightCategory(R.id.homeFragment2)
         }
         findViewById<View>(R.id.clothesBtn).setOnClickListener {
             navController.navigate(R.id.homeFragmentClothes) // Open Clothes Fragment
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true // Keep Home highlighted
+            highlightCategory(R.id.homeFragmentClothes)
         }
         findViewById<View>(R.id.electronicsBtn).setOnClickListener {
             navController.navigate(R.id.homeFragmentElectronics) // Open Electronics Fragment
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true // Keep Home highlighted
+            highlightCategory(R.id.homeFragmentElectronics)
         }
     }
 }

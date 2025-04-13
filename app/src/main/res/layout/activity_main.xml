@@ -45,6 +45,17 @@
         app:srcCompat="@drawable/bell"
         app:tint="?attr/colorOnBackground" />
 
+    <ImageView
+        android:id="@+id/menuBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/headerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/headerLayout"
+        app:srcCompat="@drawable/icon_menu"
+        app:tint="?attr/colorOnBackground" />
+
     <!-- Category Icons -->
     <LinearLayout
         android:id="@+id/categoryIcons"
