@@ -97,7 +97,6 @@ dependencies {
 
     implementation("com.cloudinary:cloudinary-android:3.0.2")
 
-
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("com.google.android.gms:play-services-maps:18.0.0")
     implementation("com.google.android.gms:play-services-location:18.0.0")

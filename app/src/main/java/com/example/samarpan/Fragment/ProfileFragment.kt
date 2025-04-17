@@ -65,6 +65,7 @@ class ProfileFragment : Fragment() {
         loadUserProfile()
 
         profileImage.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             showImagePickerDialog()
         }
 

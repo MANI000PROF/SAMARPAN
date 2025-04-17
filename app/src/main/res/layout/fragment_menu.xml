@@ -1,52 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/menuLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
     android:background="?attr/colorSurface"
-    android:elevation="8dp">
+    android:padding="24dp">
 
-    <TextView
-        android:id="@+id/appName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Samarpan"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimary" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Version 1.0.0"
-        android:textColor="?attr/colorOnSurface"
-        android:layout_marginTop="4dp" />
-
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/colorOutline" />
-
-    <!-- Add more menu options below -->
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="About"
-        android:textSize="16sp"
-        android:layout_marginTop="16dp"
-        android:textColor="?attr/colorOnSurface" />
+        android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Privacy Policy"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"
-        android:textColor="?attr/colorOnSurface" />
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Samarpan"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary" />
 
-    <!-- Add other menu items similarly -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Version 1.0.0"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginTop="4dp" />
 
-</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="?attr/colorOutline" />
+
+        <TextView
+            android:id="@+id/myContributionsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="My Contributions"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/savedLocationsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Saved Locations"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/rewardsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rewards &amp; Recognition"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/guidelinesRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Community Guidelines"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/shareRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Share App"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/contactRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Contact Us"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_menu_item"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:id="@+id/logoutOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:drawableStart="@drawable/icon_logout"
+            android:drawablePadding="12dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:textColor="?attr/colorError" />
+    </LinearLayout>
+</ScrollView>

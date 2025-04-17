@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,6 +64,7 @@ class HomeFragmentElectronics : Fragment() {
         loadData()
 
         binding.filterBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val location = binding.locationEditText.text.toString().trim()
             if (location.isEmpty()) {
                 postELectronicsAdapter.updatePostList(fullPostList, userLocation)
@@ -75,6 +77,7 @@ class HomeFragmentElectronics : Fragment() {
         }
 
         binding.addPostBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val addPostElectronicsBottomSheet = AddPostElectronicsBottomSheet()
             addPostElectronicsBottomSheet.show(parentFragmentManager, "AddPostElectronicsBottomSheet")
         }
@@ -87,9 +90,9 @@ class HomeFragmentElectronics : Fragment() {
 
     private fun setupImageSlider() {
         val imageList = arrayListOf(
-            SlideModel(R.drawable.donation1, ScaleTypes.CENTER_CROP),
-            SlideModel(R.drawable.donation5, ScaleTypes.CENTER_CROP),
-            SlideModel(R.drawable.donation6, ScaleTypes.CENTER_CROP)
+            SlideModel(R.drawable.donation_elec_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP)
         )
         binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
     }

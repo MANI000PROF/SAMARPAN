@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,12 +78,14 @@ class PostInfoFragment : Fragment() {
 
         // Expand Map on Click
         binding.mapHintText.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             showFullScreenMap()
         }
 
         // Handle "Request Food" button click
         binding.requestFoodBtn.setOnClickListener {
             Log.d("RequestBtn", "Clicked!")
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             sendFoodRequest()
         }
     }

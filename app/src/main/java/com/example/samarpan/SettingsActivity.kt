@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.view.HapticFeedbackConstants
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -22,6 +24,7 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onBackPressedDispatcher.onBackPressed()
         }
 
@@ -32,6 +35,7 @@ class SettingsActivity : AppCompatActivity() {
         setupCard(R.id.cardAbout, "About Samarpan", R.drawable.ic_about)
 
         findViewById<androidx.cardview.widget.CardView>(R.id.cardNotifications).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                 putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             }
@@ -39,6 +43,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<androidx.cardview.widget.CardView>(R.id.cardTheme).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             MaterialAlertDialogBuilder(this)
                 .setTitle("Choose Theme")
                 .setSingleChoiceItems(arrayOf("System Default", "Light", "Dark"), ThemeHelper.getCurrentTheme(this)) { dialog, which ->
@@ -53,10 +58,12 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<androidx.cardview.widget.CardView>(R.id.cardPrivacy).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             openWebPage("https://yoursite.com/privacy-policy")
         }
 
         findViewById<androidx.cardview.widget.CardView>(R.id.cardSupport).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:support@samarpan.com")
                 putExtra(Intent.EXTRA_SUBJECT, "Support Request")
@@ -65,6 +72,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<androidx.cardview.widget.CardView>(R.id.cardAbout).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             MaterialAlertDialogBuilder(this)
                 .setTitle("About Samarpan")
                 .setMessage("Version 1.0\nDeveloped with ❤️ by Samarpan Team.")

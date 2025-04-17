@@ -2,6 +2,7 @@ package com.example.samarpan
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -38,10 +39,12 @@ class IntroActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { _, _ -> }.attach()
 
         findViewById<Button>(R.id.button).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             startActivity(Intent(this, SignUpActivity::class.java))
         }
 
         findViewById<Button>(R.id.button2).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }

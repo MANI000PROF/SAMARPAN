@@ -26,6 +26,18 @@
         android:theme="@style/Theme.SAMARPAN"
         tools:targetApi="31">
         <activity
+            android:name=".ui.SavedLocationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.ContactActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.RewardsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MyContributionsActivity"
+            android:exported="false" />
+        <activity
             android:name=".FullScreenMapActivity"
             android:exported="false" />
         <activity
@@ -41,6 +53,7 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"

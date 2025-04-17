@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,6 +88,7 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
         initCloudinary()
 
         cameraBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -102,11 +104,13 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
         }
 
         locationBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val intent = Intent(requireContext(), com.example.samarpan.LocationPickerActivity::class.java)
             startActivityForResult(intent, LOCATION_PICKER_REQUEST)
         }
 
         postButton.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (validateInputs()) {
                 if (cloudinaryImageUrl != null) {
                     postFoodDetails()

@@ -2,9 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SAMARPAN" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <item name="colorPrimary">#E68A69</item>
-        <item name="colorPrimaryVariant">#643322</item>
-        <item name="colorAccent">#643322</item>
+        <item name="colorPrimary">#A56E52</item>
+        <item name="colorPrimaryVariant">#7E584B</item>
+        <item name="colorAccent">#4E7C6D</item>
         <item name="colorOnPrimary">@android:color/white</item>
         <item name="popupMenuStyle">@style/CustomPopupMenu</item>
     </style>

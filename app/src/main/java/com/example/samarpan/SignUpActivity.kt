@@ -3,6 +3,7 @@ package com.example.samarpan
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
+import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.samarpan.databinding.ActivitySignUpBinding
@@ -26,12 +27,14 @@ class SignUpActivity : AppCompatActivity() {
 
         // Navigate to LoginActivity
         binding.signInBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }
 
         // Handle Sign Up
         binding.signUpBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             registerUser()
         }
     }

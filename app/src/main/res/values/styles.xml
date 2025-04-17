@@ -14,15 +14,17 @@
     </style>
 
     <style name="ThemeOverlay.Samarpan.Menu" parent="Theme.Material3.DayNight.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.3</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
     </style>
 
     <style name="SlideInMenuAnimation">
-        <item name="android:windowEnterAnimation">@anim/side_in_left</item>
-        <item name="android:windowExitAnimation">@anim/side_out_left</item>
+        <item name="android:windowEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_left</item>
     </style>
 
 

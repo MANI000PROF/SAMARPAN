@@ -3,6 +3,7 @@ package com.example.samarpan
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import org.osmdroid.config.Configuration
@@ -47,6 +48,7 @@ class LocationPickerActivity : AppCompatActivity() {
 
         // Confirm Location Button
         findViewById<Button>(R.id.btnConfirmLocation).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             selectedGeoPoint?.let {
                 val intent = Intent().apply {
                     putExtra("latitude", it.latitude)

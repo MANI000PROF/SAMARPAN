@@ -3,6 +3,7 @@ package com.example.samarpan
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import android.view.HapticFeedbackConstants
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -51,6 +52,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Set up sign-in button
         binding.signInBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val username = binding.usernameET.text.toString().trim()
             val password = binding.passwordET.text.toString().trim()
             if (username.isEmpty() || password.isEmpty()) {
@@ -62,22 +64,26 @@ class LoginActivity : AppCompatActivity() {
 
         // Set up sign-up button
         binding.signUpBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
 
         // Set up Google Sign-In button
         binding.signInWithGoogle.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             signInWithGoogle()
         }
 
         // Set up password visibility toggle
         binding.eyeIcon.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             togglePasswordVisibility()
         }
 
         // Forgot password functionality
         binding.forgotPasswordBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             showForgotPasswordDialog()
         }
 

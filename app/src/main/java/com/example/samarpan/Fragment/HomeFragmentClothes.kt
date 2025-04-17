@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,6 +64,7 @@ class HomeFragmentClothes : Fragment() {
         loadData()
 
         binding.filterBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val location = binding.locationEditText.text.toString().trim()
             if (location.isEmpty()) {
                 postClothesAdapter.updatePostList(fullPostList, userLocation)
@@ -75,6 +77,7 @@ class HomeFragmentClothes : Fragment() {
         }
 
         binding.addPostBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val addPostClothesBottomSheet = AddPostClothesBottomSheet()
             addPostClothesBottomSheet.show(parentFragmentManager, "AddPostClothesBottomSheet")
         }
@@ -87,9 +90,9 @@ class HomeFragmentClothes : Fragment() {
 
     private fun setupImageSlider() {
         val imageList = arrayListOf(
-            SlideModel(R.drawable.donation1, ScaleTypes.CENTER_CROP),
-            SlideModel(R.drawable.donation5, ScaleTypes.CENTER_CROP),
-            SlideModel(R.drawable.donation6, ScaleTypes.CENTER_CROP)
+            SlideModel(R.drawable.donation_clothes_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_clothes_2, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_clothes_3, ScaleTypes.CENTER_CROP)
         )
         binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
     }

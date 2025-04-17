@@ -1,6 +1,7 @@
 package com.example.samarpan.Adapter
 
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ class AlertAdapter(private val alertList: MutableList<Alert>) : RecyclerView.Ada
 
         // Handle Accept button click
         holder.acceptBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             updateRequestStatus(alert, "Accepted", holder)
         }
 
@@ -49,6 +51,7 @@ class AlertAdapter(private val alertList: MutableList<Alert>) : RecyclerView.Ada
 
         // Handle Decline button click
         holder.declineBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             updateRequestStatus(alert, "Declined", holder)
         }
     }

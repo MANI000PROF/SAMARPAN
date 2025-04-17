@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,6 +64,7 @@ class HomeFragment : Fragment() {
         loadData()
 
         binding.filterBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val location = binding.locationEditText.text.toString().trim()
             if (location.isEmpty()) {
                 postAdapter.updatePostList(fullPostList, userLocation)
@@ -75,6 +77,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.addPostBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val addPostBottomSheet = AddPostBottomSheet()
             addPostBottomSheet.show(parentFragmentManager, "AddPostBottomSheet")
         }

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -66,6 +67,7 @@ class FullScreenMapActivity : AppCompatActivity() {
 
         val fabBack: FloatingActionButton = findViewById(R.id.fabBack)
         fabBack.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onBackPressedDispatcher.onBackPressed()
         }
 
