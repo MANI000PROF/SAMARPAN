@@ -78,18 +78,16 @@
             tools:srcCompat="@drawable/placeholder" />
     </androidx.cardview.widget.CardView>
 
-    <!-- Camera Button -->
-    <ImageButton
-        android:id="@+id/cameraBtn"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center|right"
+    <TextView
+        android:id="@+id/ImageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/button_shape"
-        android:contentDescription="camera"
-        android:src="@drawable/camera"
-        tools:srcCompat="@drawable/camera" />
+        android:paddingStart="10dp"
+        android:text="Click to capture"
+        android:gravity="center"
+        android:textSize="14sp" />
+
 
     <!-- Error TextView -->
     <TextView

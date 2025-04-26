@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,10 +13,13 @@
     android:gravity="center"
     tools:context=".LoginActivity">
 
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/loginAnimation"
         android:layout_width="350dp"
-        android:src="@drawable/encryption"
-        android:layout_height="200dp"/>
+        android:layout_height="300dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/login_animation"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -118,14 +125,13 @@
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
             android:layout_centerVertical="true"
-            android:background="#1A000000" />
+            android:background="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/orTxt"
             android:text="or"
             android:layout_centerInParent="true"
             android:textSize="12sp"
-            android:textColor="#80000000"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -136,11 +142,12 @@
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
             android:layout_centerVertical="true"
-            android:background="#1A000000" />
+            android:background="?attr/colorOnSurface" />
 
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/signInWithGoogle"
+        android:foreground="?attr/selectableItemBackground"
         android:background="@drawable/input_background"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
@@ -172,7 +179,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Dont have an Account?"
+            android:text="Don't have an account?"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView
@@ -186,3 +193,4 @@
     </LinearLayout>
 
 </LinearLayout>
+</ScrollView>

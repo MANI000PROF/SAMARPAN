@@ -24,10 +24,44 @@
         android:layout_margin="16dp"
         android:contentDescription="Back"
         app:srcCompat="@drawable/ic_back"
-        app:backgroundTint="@color/white"
-        app:tint="@color/black"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="?attr/colorOnSurface"
         app:layout_anchorGravity="top|start"
         android:layout_gravity="top|start" />
+
+    <!-- Center Map Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_center_map"
+        android:contentDescription="Center Map"
+        android:layout_gravity="bottom|end" />
+    <!-- Zoom In Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabZoomIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_zoom_in"
+        android:backgroundTint="?attr/colorSurface"
+        android:contentDescription="Zoom In"
+        android:layout_gravity="bottom|end" />
+
+    <!-- Zoom Out Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabZoomOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="170dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_zoom_out"
+        android:contentDescription="Zoom Out"
+        android:backgroundTint="?attr/colorSurface"
+        android:layout_gravity="bottom|end" />
 
     <!-- Optional Route Info Card -->
     <androidx.cardview.widget.CardView
@@ -37,7 +71,7 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
-        android:backgroundTint="@android:color/white"
+        android:backgroundTint="@color/colorPrimary"
         app:layout_anchorGravity="top|end"
         android:layout_gravity="top|end">
 
@@ -46,7 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Location"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             android:padding="12dp"
             android:textStyle="bold" />

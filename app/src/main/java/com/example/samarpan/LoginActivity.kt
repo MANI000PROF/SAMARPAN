@@ -87,12 +87,6 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        // Handle system insets for edge-to-edge
-//        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
     }
 
     private fun signInUser(username: String, password: String) {

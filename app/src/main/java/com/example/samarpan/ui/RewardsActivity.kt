@@ -3,6 +3,7 @@ package com.example.samarpan.ui
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -36,6 +37,7 @@ class RewardsActivity : AppCompatActivity() {
         currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         findViewById<ImageButton>(R.id.backBtn).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             finish()
         }
 

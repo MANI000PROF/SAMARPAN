@@ -185,7 +185,7 @@
                     android:id="@+id/foodPreviewLocation"
                     android:text="Location"
                     android:textSize="14sp"
-                    android:textColor="#3C3A3A"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -242,7 +242,7 @@
                     android:id="@+id/clothesPreviewLocation"
                     android:text="Location"
                     android:textSize="14sp"
-                    android:textColor="#3C3A3A"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -297,7 +297,7 @@
                     android:id="@+id/electronicsPreviewLocation"
                     android:text="Location"
                     android:textSize="14sp"
-                    android:textColor="#3C3A3A"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>

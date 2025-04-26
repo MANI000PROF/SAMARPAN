@@ -38,6 +38,10 @@ class FullScreenMapActivity : AppCompatActivity() {
         mapView = findViewById(R.id.fullScreenMapView)
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
+        mapView.zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
+        mapView.minZoomLevel = 4.0
+        mapView.maxZoomLevel = 20.0
+
 
         val latitude = intent.getDoubleExtra("latitude", 0.0)
         val longitude = intent.getDoubleExtra("longitude", 0.0)
@@ -70,6 +74,26 @@ class FullScreenMapActivity : AppCompatActivity() {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             onBackPressedDispatcher.onBackPressed()
         }
+
+        val fabCenter: FloatingActionButton = findViewById(R.id.fabCenter)
+        val fabZoomIn: FloatingActionButton = findViewById(R.id.fabZoomIn)
+        val fabZoomOut: FloatingActionButton = findViewById(R.id.fabZoomOut)
+
+        fabCenter.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            mapView.controller.animateTo(donorLocation)
+        }
+
+        fabZoomIn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            mapView.controller.zoomIn()
+        }
+
+        fabZoomOut.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            mapView.controller.zoomOut()
+        }
+
 
         if (userLat != 0.0 && userLng != 0.0) {
             // User Location Marker

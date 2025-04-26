@@ -26,6 +26,9 @@
         android:theme="@style/Theme.SAMARPAN"
         tools:targetApi="31">
         <activity
+            android:name=".ui.AIChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.SavedLocationActivity"
             android:exported="false" />
         <activity
@@ -53,8 +56,8 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />

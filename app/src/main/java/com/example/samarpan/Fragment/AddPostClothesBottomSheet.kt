@@ -45,7 +45,6 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
     private lateinit var inputClothesTitle: EditText
     private lateinit var inputClothesDescription: EditText
     private lateinit var postImage: ImageView
-    private lateinit var cameraBtn: ImageButton
     private lateinit var errorTextView: TextView
     private lateinit var postButton: AppCompatButton
     private lateinit var cancelButton: AppCompatButton
@@ -78,7 +77,6 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
         inputClothesTitle = view.findViewById(R.id.inputClothesTitle)
         inputClothesDescription = view.findViewById(R.id.inputClothesDescription)
         postImage = view.findViewById(R.id.postImage)
-        cameraBtn = view.findViewById(R.id.cameraBtn)
         errorTextView = view.findViewById(R.id.errorTextView)
         postButton = view.findViewById(R.id.postButton)
         cancelButton = view.findViewById(R.id.cancelButton)
@@ -88,7 +86,7 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
 
         initCloudinary()
 
-        cameraBtn.setOnClickListener {
+        postImage.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {

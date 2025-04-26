@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
+import com.example.samarpan.ui.AIChatActivity
 import com.example.samarpan.ui.MyContributionsActivity
 import com.example.samarpan.ui.RewardsActivity
 import com.example.samarpan.ui.ContactActivity
@@ -46,36 +47,64 @@ class MenuFragment : DialogFragment() {
 
     private fun setupMenuItemListeners() {
         rootView.findViewById<TextView>(R.id.myContributionsRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             startActivity(Intent(activity, MyContributionsActivity::class.java))
             dismiss()
         }
 
         rootView.findViewById<TextView>(R.id.savedLocationsRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             startActivity(Intent(activity, SavedLocationActivity::class.java))
             dismiss()
         }
 
         rootView.findViewById<TextView>(R.id.rewardsRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             startActivity(Intent(activity, RewardsActivity::class.java))
             dismiss()
         }
 
         rootView.findViewById<TextView>(R.id.guidelinesRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             Toast.makeText(activity, "Community Guidelines", Toast.LENGTH_SHORT).show()
             dismiss()
         }
 
         rootView.findViewById<TextView>(R.id.shareRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             shareAppDirectly()
         }
 
         rootView.findViewById<TextView>(R.id.contactRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             startActivity(Intent(activity, ContactActivity::class.java))
             dismiss()
         }
 
+        rootView.findViewById<TextView>(R.id.chatbotRow).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            startActivity(Intent(activity, AIChatActivity::class.java))
+            dismiss()
+        }
+
         rootView.findViewById<TextView>(R.id.logoutOption).setOnClickListener {
-            showLogoutConfirmationDialog()
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+
+            it.animate()
+                .scaleX(0.95f)
+                .scaleY(0.95f)
+                .setDuration(100)
+                .withEndAction {
+                    it.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(100)
+                        .start()
+
+                    showLogoutConfirmationDialog()
+                }
+                .start()
+
         }
     }
     private fun showLogoutConfirmationDialog() {

@@ -7,4 +7,6 @@
     <color name="route_color">#FF007BFF</color>
     <color name="teal_700">#00796B</color>
     <color name="colorPrimary">#C98C70</color>
+    <color name="colorSurfaceVariant">#F0F0F0</color> <!-- Light gray for bot messages -->
+    <color name="colorOutline">#CCCCCC</color>         <!-- Outline for input field -->
 </resources>

@@ -163,7 +163,11 @@ class MyContributionsActivity : AppCompatActivity() {
 
             title.text = post.title ?: "No title"
             location.text = post.location ?: "No location"
-            Glide.with(this).load(post.imageUrl).placeholder(R.drawable.placeholder).into(image)
+            Glide.with(this)
+                .load(post.imageUrl)
+                .placeholder(R.drawable.placeholder)
+                .circleCrop()
+                .into(image)
         } else {
             card.visibility = View.GONE
         }
