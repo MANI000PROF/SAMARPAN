@@ -64,6 +64,16 @@ class RewardsActivity : AppCompatActivity() {
                             userDonations = total
                             binding.totalDonations.text = "You've made $total donations"
                             updateMilestones()
+
+                            // ✅ Show animation only if donation count > 0
+                            if (userDonations > 0) {
+                                binding.celebrationAnimation.apply {
+                                    visibility = android.view.View.VISIBLE
+                                    playAnimation()
+                                }
+                            } else {
+                                binding.celebrationAnimation.visibility = android.view.View.GONE
+                            }
                         }
                     }
 

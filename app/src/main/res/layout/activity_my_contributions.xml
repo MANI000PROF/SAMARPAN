@@ -34,6 +34,19 @@
         app:layout_constraintBottom_toBottomOf="@id/backBtn"
         app:layout_constraintHorizontal_bias="0.5" />
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/celebrationLottie"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/titleText"
+        app:layout_constraintStart_toEndOf="@id/titleText"
+        app:layout_constraintTop_toTopOf="@id/titleText"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/contribution_animation" />
+
+
     <!-- Count Summary -->
     <LinearLayout
         android:id="@+id/countContainer"
@@ -317,6 +330,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/noDataAnimation"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            app:lottie_rawRes="@raw/empty_box"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"/>
 
         <TextView
             android:text="No contributions yet"

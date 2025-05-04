@@ -11,5 +11,7 @@ data class Alert(
     val timestamp: Long = 0L,          // Timestamp of the request
     val message: String? = null,       // Optional message for the alert display
     val title: String? = null,          // Optional title for the alert display
+    val requesterTitle: String? = null,
+    val requesterMessage: String? = null,
     val postImageUrl: String = "",
 ) : Serializable

@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="New Request"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -63,38 +63,22 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="You have received a request from XYZ User"
-                android:textColor="@android:color/darker_gray"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/alertIconCard"
                 app:layout_constraintTop_toBottomOf="@id/alertTitle" />
 
-            <!-- Accept Button -->
-            <Button
-                android:id="@+id/acceptBtn"
+            <TextView
+                android:id="@+id/statusTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Accept"
+                android:text="Pending"
                 android:textSize="14sp"
-                android:backgroundTint="#7CC190"
-                android:textColor="@android:color/white"
-                app:layout_constraintStart_toStartOf="@id/alertIconCard"
-                app:layout_constraintTop_toBottomOf="@id/alertMessage"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <!-- Decline Button -->
-            <Button
-                android:id="@+id/declineBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:backgroundTint="#D33333"
-                android:text="Decline"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/acceptBtn"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/alertMessage" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

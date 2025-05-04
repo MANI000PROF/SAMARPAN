@@ -165,9 +165,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:menu="@menu/bottom_menu"
-            app:itemIconTint="?attr/colorOnBackground"
-            app:itemTextColor="?attr/colorOnBackground"
-            android:background="@android:color/transparent" />
+            app:itemIconTint="@color/nav_item_color"
+            app:itemTextColor="@color/nav_item_color"
+            android:background="@android:color/transparent"
+            app:backgroundTint="@android:color/transparent"
+            app:itemRippleColor="@android:color/transparent"/>
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

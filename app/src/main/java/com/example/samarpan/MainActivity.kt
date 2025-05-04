@@ -19,6 +19,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +36,19 @@ class MainActivity : AppCompatActivity() {
         ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserId != null) {
+                    FirebaseDatabase.getInstance().getReference("users")
+                        .child(currentUserId)
+                        .child("fcmToken")
+                        .setValue(token)
+                }
+            }
+        }
 
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             private val SWIPE_THRESHOLD = 100

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".Fragment.ProfileFragment">
 
-    <!-- AppBar for Scrolling Effect -->
+    <!-- AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
-            <!-- Toolbar with Menu -->
+            <!-- Toolbar -->
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -32,7 +32,7 @@
                 app:popupTheme="@style/CustomPopupMenu"
                 app:menu="@menu/menu_profile" />
 
-            <!-- Profile Image in FrameLayout for better positioning -->
+            <!-- Profile Image -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -73,7 +73,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- User Name -->
+            <!-- User Info -->
             <TextView
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
@@ -82,7 +82,6 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textStyle="bold" />
 
-            <!-- User Details -->
             <TextView
                 android:id="@+id/userDetails"
                 android:layout_width="wrap_content"
@@ -90,7 +89,7 @@
                 android:text="Email | Location | Other Details"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-            <!-- Profile Options -->
+            <!-- Buttons Group 1 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -102,21 +101,62 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="My Donations" />
+                    android:text="My Donations"
+                    android:icon="@drawable/ic_heart" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/myConnectionsBtn"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="My Connections" />
+                    android:text="My Connections"
+                    android:icon="@drawable/ic_people" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/myRecordsBtn"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Records &amp; History" />
+                    android:text="Records &amp; History"
+                    android:icon="@drawable/history" />
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="@color/grey_font" />
+
+            <!-- Buttons Group 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/editProfileBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Edit Profile"
+                    android:icon="@drawable/ic_edit" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/savedPostsBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Saved Posts"
+                    android:icon="@drawable/ic_bookmark" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settingsBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Settings"
+                    android:icon="@drawable/ic_settings" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

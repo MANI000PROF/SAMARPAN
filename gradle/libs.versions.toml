@@ -30,6 +30,7 @@ playServicesCastTv = "21.1.1"
 firebaseFirestoreKtx = "25.1.2"
 composeMaterial = "1.4.1"
 firebaseStorageKtxVersion = "21.0.1"
+volley = "1.2.1"
 #visionCommon = "17.3.0"
 
 
@@ -61,6 +62,7 @@ play-services-cast-tv = { group = "com.google.android.gms", name = "play-service
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 google-firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtxVersion" }
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 #vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
 #image-labeling-common = { group = "com.google.mlkit", name = "image-labeling-common", version.ref = "imageLabelingCommon" }
 #image-labeling-default-common = { group = "com.google.mlkit", name = "image-labeling-default-common", version.ref = "imageLabelingDefaultCommon" }

@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
+import com.example.samarpan.Adapter.PostAdapter
 import com.example.samarpan.Adapter.PostClothesAdapter
 import com.example.samarpan.Model.DonationPostsClothes
 import com.example.samarpan.R
@@ -98,9 +99,15 @@ class HomeFragmentClothes : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        postClothesAdapter = PostClothesAdapter(ArrayList(), userLocation) { selectedPost ->
-            openPostInfoFragment(selectedPost)
-        }
+        postClothesAdapter = PostClothesAdapter(
+            requireContext(),
+            ArrayList(),
+            userLocation,
+            onPostClick = { selectedPost ->
+                openPostInfoFragment(selectedPost)
+            }
+        )
+
         binding.postRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.postRecyclerView.adapter = postClothesAdapter
     }

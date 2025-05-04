@@ -98,12 +98,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        postAdapter = PostAdapter(ArrayList(), userLocation) { selectedPost ->
-            openPostInfoFragment(selectedPost)
-        }
+        postAdapter = PostAdapter(
+            requireContext(),
+            ArrayList(),
+            userLocation,
+            onPostClick = { selectedPost ->
+                openPostInfoFragment(selectedPost)
+            }
+        )
+
         binding.postRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.postRecyclerView.adapter = postAdapter
     }
+
 
     private fun setupSwipeToRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {

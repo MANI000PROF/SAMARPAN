@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
+import com.example.samarpan.Adapter.PostAdapter
 import com.example.samarpan.Adapter.PostElectronicsAdapter
 import com.example.samarpan.Model.DonationPostsElectronics
 import com.example.samarpan.R
@@ -98,9 +99,15 @@ class HomeFragmentElectronics : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        postELectronicsAdapter = PostElectronicsAdapter(ArrayList(), userLocation) { selectedPost ->
-            openPostInfoFragment(selectedPost)
-        }
+        postELectronicsAdapter = PostElectronicsAdapter(
+            requireContext(),
+            ArrayList(),
+            userLocation,
+            onPostClick = { selectedPost ->
+                openPostInfoFragment(selectedPost)
+            }
+        )
+
         binding.postRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.postRecyclerView.adapter = postELectronicsAdapter
     }

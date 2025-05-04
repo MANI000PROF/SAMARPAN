@@ -4,5 +4,28 @@
     <item name="android:navigationBarColor">@android:color/transparent</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+    <item name="bottomNavigationStyle">@style/CustomBottomNavigation</item>
+    <item name="popupMenuStyle">@style/CustomPopupMenu</item>
+  </style>
+
+  <style name="CustomBottomNavigation" parent="Widget.Material3.BottomNavigationView">
+    <item name="android:background">@android:color/transparent</item>
+    <item name="itemRippleColor">@android:color/transparent</item>
+    <item name="itemActiveIndicatorStyle">@style/NoActiveIndicator</item>
+  </style>
+
+  <style name="NoActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+    <item name="android:width">0dp</item>
+    <item name="android:height">0dp</item>
+    <item name="android:color">@android:color/transparent</item>
+    <item name="shapeAppearance">@style/ShapeAppearance.Material3.None</item>
+  </style>
+  <style name="ShapeAppearance.Material3.None" parent="">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">0dp</item>
+  </style>
+  <style name="CustomPopupMenu" parent="Widget.Material3.PopupMenu">
+    <item name="android:popupBackground">@drawable/bg_popup_rounded</item>
+    <item name="android:textColor">?attr/colorOnSurface</item>
   </style>
 </resources>

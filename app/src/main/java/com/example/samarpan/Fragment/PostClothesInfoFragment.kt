@@ -12,6 +12,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.example.samarpan.FullScreenMapActivity
 import com.example.samarpan.Model.Alert
@@ -20,6 +24,7 @@ import com.example.samarpan.R
 import com.example.samarpan.databinding.FragmentPostClothesInfoBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -74,6 +79,14 @@ class PostClothesInfoFragment : Fragment() {
         // Populate UI with post data
         displayPostDetails()
 
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null && currentUser.uid == post.donorId) {
+            // If the current user is the donor himself
+            binding.requestClothesBtn.isEnabled = false
+            binding.requestClothesBtn.text = "Your Post"
+            binding.requestClothesBtn.alpha = 0.6f // Make it slightly faded
+        }
+
         // Initialize OpenStreetMap
         mapView = binding.locationMapView
         setupOSMMap()
@@ -101,20 +114,44 @@ class PostClothesInfoFragment : Fragment() {
 
         if (donorId == null || postId == null) return
 
+        val dynamicTitle = "New Request for: ${post.clothesTitle ?: "your post"}"
+        val dynamicMessage = "${post.profileName ?: "Someone"} is requesting your donation."
+
+        val requestRef = FirebaseDatabase.getInstance().getReference("Requests").push()
+        val requestId = requestRef.key // ✅ get the generated requestId
+
         val alert = post.clothesImage?.let {
             Alert(
                 postId = postId,
                 donorId = donorId,
                 requesterId = requesterId,
+                requestId = requestId,
                 status = "Pending", // Capitalize for consistency
                 timestamp = System.currentTimeMillis(),
-                message = "You have a new request on your post.",
-                title = "New Request",
+                message = dynamicMessage,
+                title = dynamicTitle,
+                requesterMessage = "You requested ${post.profileName ?: "Someone"}.",
+                requesterTitle = "Your request for: ${post.clothesTitle ?: "post"}",
                 postImageUrl = it
             )
         }
 
-        val requestRef = FirebaseDatabase.getInstance().getReference("Requests").push()
+        val donorTokenRef = FirebaseDatabase.getInstance().getReference("users")
+            .child(donorId ?: return)
+            .child("fcmToken")
+
+        donorTokenRef.get().addOnSuccessListener { snapshot ->
+            val receiverFcmToken = snapshot.getValue(String::class.java)
+            if (!receiverFcmToken.isNullOrEmpty()) {
+                lifecycleScope.launch {
+                    val accessToken = FirebaseAccessToken.getAccessToken(requireContext())
+                    accessToken?.let {
+                        sendPushNotification(it, receiverFcmToken, dynamicTitle, dynamicMessage)
+                    }
+                }
+            }
+        }
+
         requestRef.setValue(alert)
             .addOnSuccessListener {
                 binding.requestClothesBtn.isEnabled = false
@@ -140,6 +177,45 @@ class PostClothesInfoFragment : Fragment() {
             .load(post.clothesImage)
             .placeholder(R.drawable.placeholder)
             .into(binding.postImage)
+    }
+
+    private fun sendPushNotification(
+        accessToken: String,
+        fcmToken: String,
+        title: String,
+        message: String
+    )
+    {
+        val context = requireContext()
+        val projectId = "samarpan-42c86" // 🔁 Replace with your actual project ID
+
+        val json = JSONObject()
+        val messageObj = JSONObject()
+        val notificationObj = JSONObject()
+
+        notificationObj.put("title", title)
+        notificationObj.put("body", message)
+
+        messageObj.put("token", fcmToken)
+        messageObj.put("notification", notificationObj)
+        json.put("message", messageObj)
+
+        val url = "https://fcm.googleapis.com/v1/projects/$projectId/messages:send"
+
+        val request = object : JsonObjectRequest(
+            Method.POST, url, json,
+            Response.Listener { response -> Log.d("FCM", "Push sent: $response") },
+            Response.ErrorListener { error -> Log.e("FCM", "Error: ${error.message}") }
+        ) {
+            override fun getHeaders(): Map<String, String> {
+                return mapOf(
+                    "Authorization" to "Bearer $accessToken",
+                    "Content-Type" to "application/json"
+                )
+            }
+        }
+
+        Volley.newRequestQueue(context).add(request)
     }
 
     private fun setupOSMMap() {

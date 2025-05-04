@@ -1,5 +1,7 @@
 package com.example.samarpan.Model
 
+import java.io.Serializable
+
 data class UnifiedPost(
     var postId: String? = null,
     val donorId: String? = null,
@@ -10,4 +12,4 @@ data class UnifiedPost(
     val profileName: String? = null,
     val timestamp: Long = 0L,
     var category: String? = null  // "Food", "Clothes", "Electronics"
-)
+): Serializable

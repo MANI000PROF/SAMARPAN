@@ -22,9 +22,13 @@ import com.cloudinary.android.callback.UploadCallback
 import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
 import com.example.samarpan.IntroActivity
+import com.example.samarpan.MainActivity
 import com.example.samarpan.R
+import com.example.samarpan.SavedPostsActivity
 import com.example.samarpan.SettingsActivity
+import com.example.samarpan.ui.MyContributionsActivity
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -41,6 +45,12 @@ class ProfileFragment : Fragment() {
     private lateinit var toolbar: Toolbar
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
+    private lateinit var myDonationsBtn: MaterialButton
+    private lateinit var settingsBtn: MaterialButton
+    private lateinit var savedPostsBtn: MaterialButton
+    private lateinit var editProfileBtn: MaterialButton
+    private lateinit var historyBtn: MaterialButton
+    private lateinit var myConnectionsBtn: MaterialButton
 
     private val auth = FirebaseAuth.getInstance()
     private val dbRef = FirebaseDatabase.getInstance().reference
@@ -57,6 +67,12 @@ class ProfileFragment : Fragment() {
         toolbar = view.findViewById(R.id.toolbar)
         userNameTextView = view.findViewById(R.id.userName)
         userEmailTextView = view.findViewById(R.id.userDetails)
+        myDonationsBtn = view.findViewById(R.id.myDonationsBtn)
+        settingsBtn = view.findViewById(R.id.settingsBtn)
+        myConnectionsBtn = view.findViewById(R.id.myConnectionsBtn)
+        savedPostsBtn = view.findViewById(R.id.savedPostsBtn)
+        editProfileBtn = view.findViewById(R.id.editProfileBtn)
+        historyBtn = view.findViewById(R.id.myRecordsBtn)
 
         (requireActivity() as AppCompatActivity).setSupportActionBar(toolbar)
         setHasOptionsMenu(true)
@@ -68,6 +84,25 @@ class ProfileFragment : Fragment() {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             showImagePickerDialog()
         }
+
+        myDonationsBtn.setOnClickListener{
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val intent = Intent(requireContext(), MyContributionsActivity::class.java)
+            startActivity(intent)
+        }
+
+        settingsBtn.setOnClickListener{
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val intent = Intent(requireContext(), SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        savedPostsBtn.setOnClickListener{
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val intent = Intent(requireContext(), SavedPostsActivity::class.java)
+            startActivity(intent)
+        }
+
 
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             val percentage = abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange

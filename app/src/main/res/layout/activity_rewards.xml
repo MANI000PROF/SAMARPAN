@@ -25,6 +25,18 @@
             app:tint="?attr/colorOnSurface"
             tools:ignore="TouchTargetSizeCheck" />
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/celebrationAnimation"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="false"
+            app:lottie_speed="0.5"
+            app:lottie_rawRes="@raw/celebration_animation"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
+
         <!-- Profile Card -->
         <LinearLayout
             android:background="@drawable/card_bg_1"
@@ -102,6 +114,16 @@
             android:textSize="14sp"
             android:layout_marginTop="24dp"
             android:gravity="center" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/motivationAnimation"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="16dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/motivation_sparkle"
+            android:layout_gravity="center_horizontal" />
 
         <!-- Leaderboard Button -->
         <Button

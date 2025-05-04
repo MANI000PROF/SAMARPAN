@@ -1,17 +1,21 @@
 package com.example.samarpan.Adapter
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.samarpan.Model.DonationPostsClothes
+import com.example.samarpan.Model.DonationPostsElectronics
 import com.example.samarpan.R
 import com.example.samarpan.databinding.PostItemBinding
 
 class PostClothesAdapter(
+    private val context: Context,
     private var postList: MutableList<DonationPostsClothes>,
     private var userLocation: Location? = null,
     private val onPostClick: (DonationPostsClothes) -> Unit
@@ -40,15 +44,56 @@ class PostClothesAdapter(
                 }
                 val distance = currentUserLocation.distanceTo(postLocation).div(1000) ?: 0.0
 
-                binding.distanceText?.text = String.format("%.2f km away", distance)
-                binding.distanceText?.visibility = View.VISIBLE
+                binding.distanceText.text = String.format("%.2f km away", distance)
+                binding.distanceText.visibility = View.VISIBLE
             } else {
-                binding.distanceText?.visibility = View.GONE
+                binding.distanceText.visibility = View.GONE
             }
 
             // Click listener
             binding.root.setOnClickListener { onPostClick(post) }
+            // Long press for options
+            binding.root.setOnLongClickListener {
+                showOptionsDialog(post)
+                true
+            }
         }
+    }
+
+    private fun showOptionsDialog(post: DonationPostsClothes) {
+        val options = arrayOf("Save Post", "Hide Post") // Hide is not implemented yet
+
+        androidx.appcompat.app.AlertDialog.Builder(context)
+            .setTitle("Choose an action")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> savePostToFirebase(post)
+                    1 -> {
+                        // Placeholder for "Hide Post"
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun savePostToFirebase(post: DonationPostsClothes) {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val postId = post.postId ?: return
+        val category = "Clothes"
+
+        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference("SavedPosts")
+            .child(userId)
+            .child(category)
+            .child(postId)
+
+        dbRef.setValue(post)
+            .addOnSuccessListener {
+                android.widget.Toast.makeText(context, "Post saved!", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                android.widget.Toast.makeText(context, "Failed to save post.", android.widget.Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {

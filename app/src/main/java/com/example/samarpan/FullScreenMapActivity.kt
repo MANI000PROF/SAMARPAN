@@ -81,8 +81,15 @@ class FullScreenMapActivity : AppCompatActivity() {
 
         fabCenter.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            mapView.controller.animateTo(donorLocation)
+
+            if (!(userLat.isNaN() || userLng.isNaN() || (userLat == 0.0 && userLng == 0.0))){
+                mapView.controller.animateTo(userLocation)
+            } else {
+                mapView.controller.animateTo(donorLocation)
+                Toast.makeText(this, "Current location not found, showing donor location.", Toast.LENGTH_SHORT).show()
+            }
         }
+
 
         fabZoomIn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)

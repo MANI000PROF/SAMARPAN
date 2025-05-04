@@ -96,6 +96,17 @@
             android:textSize="15sp" />
 
         <ImageButton
+            android:id="@+id/micButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_send_btn"
+            android:src="@drawable/ic_mic"
+            android:contentDescription="Voice Input"
+            app:tint="@android:color/white" />
+
+
+        <ImageButton
             android:id="@+id/sendButton"
             android:layout_width="48dp"
             android:layout_height="48dp"

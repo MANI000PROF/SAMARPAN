@@ -36,6 +36,11 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    packaging{
+        resources{
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -62,6 +67,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.google.firebase.storage.ktx)
+    implementation(libs.volley)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -96,7 +102,9 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.0")
 
     implementation("com.cloudinary:cloudinary-android:3.0.2")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
 
+    implementation("com.google.firebase:firebase-messaging:23.1.0")
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("com.google.android.gms:play-services-maps:18.0.0")
     implementation("com.google.android.gms:play-services-location:18.0.0")

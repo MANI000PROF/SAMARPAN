@@ -12,6 +12,8 @@
         android:name="android.hardware.camera"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -25,6 +27,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SAMARPAN"
         tools:targetApi="31">
+        <activity
+            android:name=".SavedPostsActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".ui.AIChatActivity"
             android:exported="false" />
