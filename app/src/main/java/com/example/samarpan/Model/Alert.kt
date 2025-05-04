@@ -14,4 +14,5 @@ data class Alert(
     val requesterTitle: String? = null,
     val requesterMessage: String? = null,
     val postImageUrl: String = "",
+    val category: String = ""
 ) : Serializable

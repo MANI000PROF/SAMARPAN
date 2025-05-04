@@ -54,6 +54,7 @@ class PostInfoFragment : Fragment() {
     private lateinit var myLocationOverlay: MyLocationNewOverlay
     private var userGeoPoint: GeoPoint? = null
     private var donorGeoPoint: GeoPoint? = null
+    private val locationHandler = Handler(Looper.getMainLooper())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -243,20 +244,25 @@ class PostInfoFragment : Fragment() {
         overlays.add(myLocationOverlay)
 
         // 🔴 Step 3: Wait for Accurate Location Update
-        Handler(Looper.getMainLooper()).postDelayed({
+        locationHandler.postDelayed({
+            if (!isAdded || _binding == null) return@postDelayed
+
             userGeoPoint = myLocationOverlay.myLocation
             if (userGeoPoint != null && userGeoPoint!!.latitude != 0.0 && userGeoPoint!!.longitude != 0.0) {
                 Log.d("PostInfoFragment", "User Location Found: ${userGeoPoint!!.latitude}, ${userGeoPoint!!.longitude}")
-                mapView.zoomToBoundingBox(BoundingBox.fromGeoPoints(listOf(donorLocation, userGeoPoint!!)), true)
-                drawRoute(donorLocation, userGeoPoint!!)
+                mapView.zoomToBoundingBox(
+                    BoundingBox.fromGeoPoints(listOf(donorGeoPoint!!, userGeoPoint!!)), true
+                )
+                drawRoute(donorGeoPoint!!, userGeoPoint!!)
             } else {
                 Log.e("PostInfoFragment", "User Location Not Found, Defaulting to Donor Location")
                 Toast.makeText(requireContext(), "Unable to fetch current location!", Toast.LENGTH_SHORT).show()
                 mapView.controller.setZoom(15.0)
-                mapView.controller.setCenter(donorLocation)
+                mapView.controller.setCenter(donorGeoPoint)
             }
             mapView.invalidate()
-        }, 4000) // Wait 4 seconds to get a more accurate location
+        }, 4000)
+        // Wait 4 seconds to get a more accurate location
     }
 
 
@@ -285,6 +291,8 @@ class PostInfoFragment : Fragment() {
                 }
 
                 activity?.runOnUiThread {
+                    if (!isAdded || _binding == null) return@runOnUiThread  // ✅ check if view is safe to access
+
                     val polyline = Polyline()
                     polyline.setPoints(roadPoints)
                     polyline.color = resources.getColor(R.color.route_color, null)
@@ -292,9 +300,11 @@ class PostInfoFragment : Fragment() {
                     mapView.overlays.add(polyline)
                     mapView.invalidate()
                 }
+
             } catch (e: Exception) {
                 Log.e("RouteError", "Failed to get route", e)
                 activity?.runOnUiThread {
+                    if (!isAdded || _binding == null) return@runOnUiThread
                     Toast.makeText(requireContext(), "No route found!", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -316,6 +326,8 @@ class PostInfoFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        locationHandler.removeCallbacksAndMessages(null) // ✅ cancel pending tasks
         _binding = null
     }
+
 }
