@@ -20,17 +20,42 @@ class SearchAdapter(
         private val location: TextView = itemView.findViewById(R.id.location)
         private val profile: TextView = itemView.findViewById(R.id.profileName)
         private val image: ImageView = itemView.findViewById(R.id.foodImage)
+        private val time: TextView = itemView.findViewById(R.id.timeStamp)
 
         fun bind(post: UnifiedPost) {
             title.text = post.title
             location.text = post.location
             profile.text = post.profileName
+            post.timestamp.let {
+                time.text = getTimeAgo(it)
+            }
 
             Glide.with(itemView.context)
                 .load(post.imageUrl)
                 .into(image)
 
             itemView.setOnClickListener { onItemClick?.invoke(post) }
+        }
+    }
+
+    private fun getTimeAgo(time: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - time
+
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+
+        return when {
+            seconds < 60 -> "just now"
+            minutes < 60 -> "$minutes min ago"
+            hours < 24 -> "$hours hrs ago"
+            days < 7 -> "$days days ago"
+            else -> {
+                val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
+                sdf.format(java.util.Date(time))
+            }
         }
     }
 

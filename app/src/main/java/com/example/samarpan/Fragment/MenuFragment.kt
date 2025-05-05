@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
+import com.example.samarpan.SavedPostsActivity
 import com.example.samarpan.ui.AIChatActivity
 import com.example.samarpan.ui.MyContributionsActivity
 import com.example.samarpan.ui.RewardsActivity
@@ -52,9 +53,9 @@ class MenuFragment : DialogFragment() {
             dismiss()
         }
 
-        rootView.findViewById<TextView>(R.id.savedLocationsRow).setOnClickListener {
+        rootView.findViewById<TextView>(R.id.savedPostsRow).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            startActivity(Intent(activity, SavedLocationActivity::class.java))
+            startActivity(Intent(activity, SavedPostsActivity::class.java))
             dismiss()
         }
 

@@ -46,10 +46,10 @@
             android:textColor="?attr/colorOnSurface" />
 
         <TextView
-            android:id="@+id/savedLocationsRow"
+            android:id="@+id/savedPostsRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Saved Locations"
+            android:text="Saved Posts"
             android:textSize="16sp"
             android:layout_marginTop="8dp"
             android:padding="12dp"

@@ -117,7 +117,7 @@ class PostClothesInfoFragment : Fragment() {
         if (donorId == null || postId == null) return
 
         val dynamicTitle = "New Request for: ${post.clothesTitle ?: "your post"}"
-        val dynamicMessage = "${post.profileName ?: "Someone"} is requesting your donation."
+        val dynamicMessage = "${currentUser.displayName ?: "Someone"} is requesting your donation."
 
         val requestRef = FirebaseDatabase.getInstance().getReference("Requests").push()
         val requestId = requestRef.key // ✅ get the generated requestId

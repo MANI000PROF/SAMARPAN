@@ -26,6 +26,9 @@ class PostAdapter(
             binding.profileName.text = post.profileName ?: "Unknown"
             binding.location.text = post.location ?: "Unknown"
             binding.foodTitle.text = post.foodTitle ?: "Unknown"
+            post.timestamp.let {
+                binding.timeStamp.text = getTimeAgo(it)
+            }
 
             // Load image with Glide
             Glide.with(binding.foodImage.context)
@@ -49,7 +52,9 @@ class PostAdapter(
             }
 
             // Click listener
-            binding.root.setOnClickListener { onPostClick(post) }
+            binding.root.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                onPostClick(post) }
 
             // Long press for options
             binding.root.setOnLongClickListener {
@@ -58,6 +63,27 @@ class PostAdapter(
             }
         }
     }
+    private fun getTimeAgo(time: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - time
+
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+
+        return when {
+            seconds < 60 -> "just now"
+            minutes < 60 -> "$minutes min ago"
+            hours < 24 -> "$hours hrs ago"
+            days < 7 -> "$days days ago"
+            else -> {
+                val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
+                sdf.format(java.util.Date(time))
+            }
+        }
+    }
+
 
     private fun showOptionsDialog(post: DonationPosts) {
         val options = arrayOf("Save Post", "Hide Post") // Hide is not implemented yet

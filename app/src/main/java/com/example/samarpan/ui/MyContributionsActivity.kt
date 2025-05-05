@@ -9,7 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.samarpan.Adapter.MyContributionAdapter
 import com.example.samarpan.Model.DonationPosts
 import com.example.samarpan.Model.DonationPostsClothes
 import com.example.samarpan.Model.DonationPostsElectronics
@@ -21,164 +24,197 @@ import com.google.firebase.database.*
 
 class MyContributionsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMyContributionsBinding
+    private lateinit var foodRecyclerView: RecyclerView
+    private lateinit var clothesRecyclerView: RecyclerView
+    private lateinit var electronicsRecyclerView: RecyclerView
+    private lateinit var noDataLayout: View
+
+    private lateinit var totalCountText: TextView
+    private lateinit var foodCountText: TextView
+    private lateinit var clothesCountText: TextView
+    private lateinit var electronicsCountText: TextView
+
+    private val foodList = mutableListOf<UnifiedPost>()
+    private val clothesList = mutableListOf<UnifiedPost>()
+    private val electronicsList = mutableListOf<UnifiedPost>()
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-    private val userPosts = mutableListOf<UnifiedPost>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMyContributionsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_my_contributions)
 
-        binding.backBtn.setOnClickListener {
+        // Initialize views
+        foodRecyclerView = findViewById(R.id.foodRecyclerView)
+        clothesRecyclerView = findViewById(R.id.clothesRecyclerView)
+        electronicsRecyclerView = findViewById(R.id.electronicsRecyclerView)
+        noDataLayout = findViewById(R.id.noDataLayout)
+
+        totalCountText = findViewById(R.id.totalCount)
+        foodCountText = findViewById(R.id.foodCountText)
+        clothesCountText = findViewById(R.id.clothesCountText)
+        electronicsCountText = findViewById(R.id.electronicsCountText)
+
+        findViewById<ImageView>(R.id.backBtn).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             finish()
         }
 
-        if (currentUserId == null || !isInternetAvailable()) {
+        // Set Adapters
+        foodRecyclerView.adapter = MyContributionAdapter(foodList)
+        clothesRecyclerView.adapter = MyContributionAdapter(clothesList)
+        electronicsRecyclerView.adapter = MyContributionAdapter(electronicsList)
+
+        foodRecyclerView.setHasFixedSize(true)
+        clothesRecyclerView.setHasFixedSize(true)
+        electronicsRecyclerView.setHasFixedSize(true)
+
+        foodRecyclerView.layoutManager = LinearLayoutManager(this)
+        clothesRecyclerView.layoutManager = LinearLayoutManager(this)
+        electronicsRecyclerView.layoutManager = LinearLayoutManager(this)
+
+
+        loadContributions()
+    }
+
+    private fun loadContributions() {
+        if (currentUserId == null) {
             showNoData()
-        } else {
-            loadUserPosts()
+            return
         }
-    }
 
-    private fun loadUserPosts() {
         val db = FirebaseDatabase.getInstance().reference
-        val references = listOf(
-            Triple(db.child("DonationPosts"), "Food", DonationPosts::class.java),
-            Triple(db.child("DonationPostsClothes"), "Clothes", DonationPostsClothes::class.java),
-            Triple(db.child("DonationPostsElectronics"), "Electronics", DonationPostsElectronics::class.java)
-        )
 
+        val foodRef = db.child("DonationPosts")
+        val clothesRef = db.child("DonationPostsClothes")
+        val electronicsRef = db.child("DonationPostsElectronics")
+
+        foodList.clear()
+        clothesList.clear()
+        electronicsList.clear()
+
+        val userPosts = mutableListOf<UnifiedPost>()
         var completed = 0
-        val total = references.size
+        val total = 3
 
-        references.forEach { (ref, category, clazz) ->
-            ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    for (data in snapshot.children) {
-                        val post = data.getValue(clazz)
-                        val unifiedPost = when (post) {
-                            is DonationPosts -> post.toUnified(data.key, "Food")
-                            is DonationPostsClothes -> post.toUnified(data.key, "Clothes")
-                            is DonationPostsElectronics -> post.toUnified(data.key, "Electronics")
-                            else -> null
-                        }
-                        if (unifiedPost?.donorId == currentUserId) {
-                            if (unifiedPost != null) {
-                                userPosts.add(unifiedPost)
-                            }
-                        }
+        fun checkDone() {
+            completed++
+            if (completed < total) return
+
+            // Filter and update lists
+            val myPosts = userPosts.filter { it.donorId == currentUserId }
+            foodList.addAll(myPosts.filter { it.category == "Food" })
+            clothesList.addAll(myPosts.filter { it.category == "Clothes" })
+            electronicsList.addAll(myPosts.filter { it.category == "Electronics" })
+
+            foodRecyclerView.adapter?.notifyDataSetChanged()
+            clothesRecyclerView.adapter?.notifyDataSetChanged()
+            electronicsRecyclerView.adapter?.notifyDataSetChanged()
+
+            updateTotalCount()
+            updateNoDataVisibility()
+        }
+
+
+        foodRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (data in snapshot.children) {
+                    val post = data.getValue(DonationPosts::class.java)
+                    if (post != null) {
+                        userPosts.add(
+                            UnifiedPost(
+                                postId = data.key,
+                                donorId = post.donorId,
+                                title = post.foodTitle,
+                                description = post.foodDescription,
+                                imageUrl = post.foodImage,
+                                location = post.location,
+                                profileName = post.profileName,
+                                timestamp = post.timestamp,
+                                category = "Food"
+                            )
+                        )
                     }
-                    if (++completed == total) updateUI()
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    if (++completed == total) updateUI()
-                }
-            })
-        }
-    }
-
-    private fun DonationPosts.toUnified(id: String?, category: String) = UnifiedPost(
-        postId = id,
-        donorId = donorId,
-        title = foodTitle,
-        description = foodDescription,
-        imageUrl = foodImage,
-        location = location,
-        profileName = profileName,
-        timestamp = timestamp,
-        category = category
-    )
-
-    private fun DonationPostsClothes.toUnified(id: String?, category: String) = UnifiedPost(
-        postId = id,
-        donorId = donorId,
-        title = clothesTitle,
-        description = clothesDescription,
-        imageUrl = clothesImage,
-        location = location,
-        profileName = profileName,
-        timestamp = timestamp,
-        category = category
-    )
-
-    private fun DonationPostsElectronics.toUnified(id: String?, category: String) = UnifiedPost(
-        postId = id,
-        donorId = donorId,
-        title = electronicsTitle,
-        description = electronicsDescription,
-        imageUrl = electronicsImage,
-        location = location,
-        profileName = profileName,
-        timestamp = timestamp,
-        category = category
-    )
-
-    private fun updateUI() {
-        val (food, clothes, electronics) = listOf("Food", "Clothes", "Electronics").map { cat ->
-            userPosts.filter { it.category == cat }
-        }
-
-        binding.foodCountText.text = food.size.toString()
-        binding.clothesCountText.text = clothes.size.toString()
-        binding.electronicsCountText.text = electronics.size.toString()
-        binding.totalCount.text = userPosts.size.toString()
-
-        loadPreview(binding.foodPreview, food.firstOrNull())
-        loadPreview(binding.clothesPreview, clothes.firstOrNull())
-        loadPreview(binding.electronicsPreview, electronics.firstOrNull())
-
-        binding.noDataLayout.visibility = if (userPosts.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    private fun loadPreview(card: CardView, post: UnifiedPost?) {
-        if (post != null) {
-            card.visibility = View.VISIBLE
-
-            // Choose the correct views based on the category
-            val image: ImageView
-            val title: TextView
-            val location: TextView
-
-            when (post.category) {
-                "Food" -> {
-                    image = card.findViewById(R.id.foodPreviewImage)
-                    title = card.findViewById(R.id.foodPreviewTitle)
-                    location = card.findViewById(R.id.foodPreviewLocation)
-                }
-                "Clothes" -> {
-                    image = card.findViewById(R.id.clothesPreviewImage)
-                    title = card.findViewById(R.id.clothesPreviewTitle)
-                    location = card.findViewById(R.id.clothesPreviewLocation)
-                }
-                "Electronics" -> {
-                    image = card.findViewById(R.id.electronicsPreviewImage)
-                    title = card.findViewById(R.id.electronicsPreviewTitle)
-                    location = card.findViewById(R.id.electronicsPreviewLocation)
-                }
-                else -> return
+                checkDone()
             }
 
-            title.text = post.title ?: "No title"
-            location.text = post.location ?: "No location"
-            Glide.with(this)
-                .load(post.imageUrl)
-                .placeholder(R.drawable.placeholder)
-                .circleCrop()
-                .into(image)
-        } else {
-            card.visibility = View.GONE
-        }
+            override fun onCancelled(error: DatabaseError) {
+                checkDone()
+            }
+        })
+
+        clothesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (data in snapshot.children) {
+                    val post = data.getValue(DonationPostsClothes::class.java)
+                    if (post != null) {
+                        userPosts.add(
+                            UnifiedPost(
+                                postId = data.key,
+                                donorId = post.donorId,
+                                title = post.clothesTitle,
+                                description = post.clothesDescription,
+                                imageUrl = post.clothesImage,
+                                location = post.location,
+                                profileName = post.profileName,
+                                timestamp = post.timestamp,
+                                category = "Clothes"
+                            )
+                        )
+                    }
+                }
+                checkDone()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                checkDone()
+            }
+        })
+
+        electronicsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (data in snapshot.children) {
+                    val post = data.getValue(DonationPostsElectronics::class.java)
+                    if (post != null) {
+                        userPosts.add(
+                            UnifiedPost(
+                                postId = data.key,
+                                donorId = post.donorId,
+                                title = post.electronicsTitle,
+                                description = post.electronicsDescription,
+                                imageUrl = post.electronicsImage,
+                                location = post.location,
+                                profileName = post.profileName,
+                                timestamp = post.timestamp,
+                                category = "Electronics"
+                            )
+                        )
+                    }
+                }
+                checkDone()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                checkDone()
+            }
+        })
+    }
+
+    private fun updateTotalCount() {
+        val total = foodList.size + clothesList.size + electronicsList.size
+        totalCountText.text = total.toString()
+        foodCountText.text = foodList.size.toString()
+        clothesCountText.text = clothesList.size.toString()
+        electronicsCountText.text = electronicsList.size.toString()
+    }
+
+    private fun updateNoDataVisibility() {
+        val isEmpty = foodList.isEmpty() && clothesList.isEmpty() && electronicsList.isEmpty()
+        noDataLayout.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
     private fun showNoData() {
-        binding.noDataLayout.visibility = View.VISIBLE
-    }
-
-    private fun isInternetAvailable(): Boolean {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return cm.activeNetworkInfo?.isConnectedOrConnecting == true
+        noDataLayout.visibility = View.VISIBLE
     }
 }
+

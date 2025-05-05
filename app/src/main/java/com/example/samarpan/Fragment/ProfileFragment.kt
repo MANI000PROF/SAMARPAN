@@ -14,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
@@ -22,11 +21,10 @@ import com.cloudinary.android.callback.UploadCallback
 import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
 import com.example.samarpan.IntroActivity
-import com.example.samarpan.MainActivity
 import com.example.samarpan.R
-import com.example.samarpan.SavedPostsActivity
 import com.example.samarpan.SettingsActivity
 import com.example.samarpan.ui.MyContributionsActivity
+import com.example.samarpan.ui.SavedLocationActivity
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -47,7 +45,7 @@ class ProfileFragment : Fragment() {
     private lateinit var userEmailTextView: TextView
     private lateinit var myDonationsBtn: MaterialButton
     private lateinit var settingsBtn: MaterialButton
-    private lateinit var savedPostsBtn: MaterialButton
+    private lateinit var savedLocationsBtn: MaterialButton
     private lateinit var editProfileBtn: MaterialButton
     private lateinit var historyBtn: MaterialButton
     private lateinit var myConnectionsBtn: MaterialButton
@@ -70,7 +68,7 @@ class ProfileFragment : Fragment() {
         myDonationsBtn = view.findViewById(R.id.myDonationsBtn)
         settingsBtn = view.findViewById(R.id.settingsBtn)
         myConnectionsBtn = view.findViewById(R.id.myConnectionsBtn)
-        savedPostsBtn = view.findViewById(R.id.savedPostsBtn)
+        savedLocationsBtn = view.findViewById(R.id.savedLocationBtn)
         editProfileBtn = view.findViewById(R.id.editProfileBtn)
         historyBtn = view.findViewById(R.id.myRecordsBtn)
 
@@ -97,9 +95,9 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        savedPostsBtn.setOnClickListener{
+        savedLocationsBtn.setOnClickListener{
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            val intent = Intent(requireContext(), SavedPostsActivity::class.java)
+            val intent = Intent(requireContext(), SavedLocationActivity::class.java)
             startActivity(intent)
         }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -17,42 +18,72 @@
             android:id="@+id/foodImage"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/placeholder"
             android:background="@drawable/bg_popup_rounded"
             android:clipToOutline="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="1:1" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/timeStamp" />
+
+        <TextView
+            android:id="@+id/timeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="2 hours ago"
+            android:textColor="@color/grey_font"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="@+id/foodImage"
+            app:layout_constraintStart_toStartOf="@+id/foodImage"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/profileName"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
             android:text="@string/profile_name"
-            android:textStyle="bold"
             android:textAlignment="center"
             android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@id/foodImage"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/foodImage" />
 
-        <TextView
-            android:id="@+id/location"
-            android:layout_width="0dp"
+
+        <LinearLayout
+            android:id="@+id/locationLayout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location"
-            android:textAlignment="center"
-            android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/profileName"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/profileName">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Mumbai, India"
+                android:textColor="@color/grey_font"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/distanceText"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2.3 km away"
             android:textAlignment="center"
@@ -60,7 +91,7 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/location"
+            app:layout_constraintTop_toBottomOf="@id/locationLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -70,12 +101,16 @@
             android:layout_height="wrap_content"
             android:text="@string/food_title"
             android:textSize="13sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_category_badge"
             app:layout_constraintTop_toBottomOf="@id/distanceText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

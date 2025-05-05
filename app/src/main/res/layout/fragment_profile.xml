@@ -143,11 +143,11 @@
                     android:icon="@drawable/ic_edit" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/savedPostsBtn"
+                    android:id="@+id/savedLocationBtn"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Saved Posts"
+                    android:text="Saved Locations"
                     android:icon="@drawable/ic_bookmark" />
 
                 <com.google.android.material.button.MaterialButton

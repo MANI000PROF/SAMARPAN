@@ -115,7 +115,7 @@ class PostInfoFragment : Fragment() {
         if (donorId == null || postId == null) return
 
         val dynamicTitle = "New Request for: ${post.foodTitle ?: "your post"}"
-        val dynamicMessage = "${post.profileName ?: "Someone"} is requesting your donation."
+        val dynamicMessage = "${currentUser.displayName ?: "Someone"} is requesting your donation."
 
         val postImageUrl = post.foodImage ?: "https://default-image-url.com"
 

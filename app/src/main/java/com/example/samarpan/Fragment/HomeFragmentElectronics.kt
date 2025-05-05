@@ -142,12 +142,13 @@ class HomeFragmentElectronics : Fragment() {
             loadPostsFromCache()
         }
     }
+    private var postListener: ValueEventListener? = null
 
     private fun loadPostsFromFirebase() {
         binding.swipeRefreshLayout.isRefreshing = true
         database = FirebaseDatabase.getInstance().getReference("DonationPostsElectronics")
 
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+        postListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 postList.clear()
                 fullPostList.clear()
@@ -185,7 +186,9 @@ class HomeFragmentElectronics : Fragment() {
                 Log.e("HomeFragmentElectronics", "Database error: ${error.message}")
                 binding.swipeRefreshLayout.isRefreshing = false
             }
-        })
+        }
+        database.addValueEventListener(postListener as ValueEventListener)
+
     }
 
     private fun loadPostsFromCache() {
@@ -259,6 +262,7 @@ class HomeFragmentElectronics : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        postListener?.let { database.removeEventListener(it) }
         _binding = null
     }
 }

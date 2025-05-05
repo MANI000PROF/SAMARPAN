@@ -143,11 +143,15 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private var postListener: ValueEventListener? = null
+
     private fun loadPostsFromFirebase() {
         binding.swipeRefreshLayout.isRefreshing = true
         database = FirebaseDatabase.getInstance().getReference("DonationPosts")
 
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+        postListener?.let { database.removeEventListener(it) }  // Avoid multiple listeners
+
+        postListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 postList.clear()
                 fullPostList.clear()
@@ -185,8 +189,11 @@ class HomeFragment : Fragment() {
                 Log.e("HomeFragment", "Database error: ${error.message}")
                 binding.swipeRefreshLayout.isRefreshing = false
             }
-        })
+        }
+
+        database.addValueEventListener(postListener as ValueEventListener)
     }
+
 
     private fun loadPostsFromCache() {
         val sharedPreferences = requireContext().getSharedPreferences("SAMARPAN_PREFS", Context.MODE_PRIVATE)
@@ -259,6 +266,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        postListener?.let { database.removeEventListener(it) }
         _binding = null
     }
 }

@@ -11,5 +11,6 @@ data class UnifiedPost(
     val location: String? = null,
     val profileName: String? = null,
     val timestamp: Long = 0L,
+    val profileImageUrl: String? = null,
     var category: String? = null  // "Food", "Clothes", "Electronics"
 ): Serializable
