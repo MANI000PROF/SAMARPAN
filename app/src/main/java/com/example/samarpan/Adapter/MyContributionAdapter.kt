@@ -52,7 +52,7 @@ class MyContributionAdapter(private val postList: List<UnifiedPost>) :
         // Load profile image (optional: fallback to default)
         Glide.with(holder.itemView.context)
             .load(post.profileImageUrl)
-            .placeholder(R.drawable.profile)
+            .placeholder(R.drawable.ic_profile)
             .circleCrop()
             .into(holder.profileImage)
 

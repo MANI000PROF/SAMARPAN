@@ -19,6 +19,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import android.view.animation.AnimationUtils
+import com.airbnb.lottie.LottieAnimationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -87,6 +89,9 @@ class MainActivity : AppCompatActivity() {
         appName.animate().alpha(1f).translationY(0f).setDuration(600).setStartDelay(150).start()
 
         val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons)
+        val menuBtn = findViewById<LottieAnimationView>(R.id.menuBtn)
+        val alertBtn = findViewById<LottieAnimationView>(R.id.alertBtn)
+
         iconsLayout.alpha = 0f
         iconsLayout.translationY = 50f
         iconsLayout.animate().alpha(1f).translationY(0f).setDuration(600).setStartDelay(200).start()
@@ -97,7 +102,48 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             highlightCategory(destination.id)
+
+            val showIcons = when (destination.id) {
+                R.id.homeFragment2,
+                R.id.homeFragmentClothes,
+                R.id.homeFragmentElectronics -> true
+                else -> false
+            }
+
+
+            if (showIcons) {
+                if (iconsLayout.visibility != View.VISIBLE) {
+                    iconsLayout.visibility = View.VISIBLE
+                    iconsLayout.animate().alpha(1f).translationY(0f).setDuration(300).start()
+                }
+                if (appName.visibility != View.VISIBLE) {
+                    appName.visibility = View.VISIBLE
+                    appName.animate().alpha(1f).translationY(0f).setDuration(300).start()
+                }
+                if (menuBtn.visibility != View.VISIBLE) {
+                    menuBtn.visibility = View.VISIBLE
+                    menuBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
+                }
+                if (alertBtn.visibility != View.VISIBLE) {
+                    alertBtn.visibility = View.VISIBLE
+                    alertBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
+                }
+            } else {
+                iconsLayout.animate().alpha(0f).translationY(-iconsLayout.height.toFloat()).setDuration(300)
+                    .withEndAction { iconsLayout.visibility = View.GONE }.start()
+
+                appName.animate().alpha(0f).translationY(-30f).setDuration(300)
+                    .withEndAction { appName.visibility = View.GONE }.start()
+
+                menuBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
+                    .withEndAction { menuBtn.visibility = View.GONE }.start()
+
+                alertBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
+                    .withEndAction { alertBtn.visibility = View.GONE }.start()
+            }
         }
+
+
 
         val bottomNav: BottomNavigationView = findViewById(R.id.bottomNavigationView)
         bottomNav.translationY = 300f
@@ -119,12 +165,12 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        findViewById<View>(R.id.alertBtn).setOnClickListener { view ->
+        alertBtn.setOnClickListener { view ->
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             BottomAlertsFragment().show(supportFragmentManager, "BottomAlertsFragment")
         }
 
-        findViewById<View>(R.id.menuBtn).setOnClickListener { view ->
+        menuBtn.setOnClickListener { view ->
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             MenuFragment().show(supportFragmentManager, "MenuFragment")
         }
@@ -150,6 +196,42 @@ class MainActivity : AppCompatActivity() {
             highlightCategory(R.id.homeFragmentElectronics)
         }
     }
+
+    fun setCategoryIconsVisibility(show: Boolean) {
+        val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons) ?: return
+
+        Log.d("CategoryIcons", "setCategoryIconsVisibility called with show = $show")
+
+        val isVisible = iconsLayout.visibility == View.VISIBLE
+
+        if (show && !isVisible) {
+            iconsLayout.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(300)
+                .withStartAction { iconsLayout.visibility = View.VISIBLE }
+                .start()
+        } else if (!show && isVisible) {
+            iconsLayout.animate()
+                .alpha(0f)
+                .translationY(-iconsLayout.height.toFloat())
+                .setDuration(300)
+                .withEndAction { iconsLayout.visibility = View.GONE }
+                .start()
+        }
+    }
+    fun updateAlertAnimation(hasAlerts: Boolean) {
+        val alertBtn = findViewById<LottieAnimationView>(R.id.alertBtn)
+        if (hasAlerts) {
+            alertBtn.loop(true)
+            alertBtn.playAnimation()
+        } else {
+            alertBtn.pauseAnimation()
+            alertBtn.progress = 0f // Reset to start frame
+            alertBtn.repeatCount = 0
+        }
+    }
+
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(ev)

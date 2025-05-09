@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
 import com.example.samarpan.Adapter.PostAdapter
+import com.example.samarpan.MainActivity
 import com.example.samarpan.Model.DonationPosts
 import com.example.samarpan.R
 import com.example.samarpan.databinding.FragmentHomeBinding
@@ -80,6 +81,12 @@ class HomeFragment : Fragment() {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val addPostBottomSheet = AddPostBottomSheet()
             addPostBottomSheet.show(parentFragmentManager, "AddPostBottomSheet")
+        }
+
+        binding.nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            val showIcons = scrollY == 0
+            Log.d("ScrollCheck", "ScrollY: $scrollY — showIcons: $showIcons")
+            (activity as? MainActivity)?.setCategoryIconsVisibility(showIcons)
         }
     }
 

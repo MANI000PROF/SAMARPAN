@@ -4,10 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samarpan.Adapter.AlertAdapter
+import com.example.samarpan.MainActivity
 import com.example.samarpan.Model.Alert
 import com.example.samarpan.databinding.FragmentBottomAlertsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -101,6 +104,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                     binding.noAlertsTextView.visibility = View.GONE
                     binding.alertRecyclerView.visibility = View.VISIBLE
                 }
+                (activity as? MainActivity)?.updateAlertAnimation(alertList.isNotEmpty())
 
                 alertAdapter.notifyDataSetChanged()
             }
@@ -119,33 +123,28 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
     private fun enableSwipeGestures() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Only allow swiping for alerts where the current user is the donor and the status is "Pending"
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
-            ): Boolean {
-                // Prevent any drag-and-drop behavior by returning false
-                return false
-            }
+            ): Boolean = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val alert = alertList[position]
 
                 if (alert.status == "Pending" && alert.donorId == currentUserId) {
-                    vibrateShort()
-                    // Donor swiping to accept or decline
+                    viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+
                     if (direction == ItemTouchHelper.RIGHT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Accepted")
                     } else if (direction == ItemTouchHelper.LEFT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Declined")
                     }
                 } else if ((alert.status == "Accepted" || alert.status == "Declined") && alert.requesterId == currentUserId) {
-                    // Requester swiping to delete accepted/declined alert
-                    vibrateShort()
+                    viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+
                     val requestId = alert.requestId ?: return
                     FirebaseDatabase.getInstance().getReference("Requests").child(requestId)
                         .removeValue()
@@ -159,41 +158,55 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                             alertAdapter.notifyItemChanged(position)
                         }
                 } else {
-                    // Restrict swipe
-                    Toast.makeText(context, "You can't perform this action", Toast.LENGTH_SHORT).show()
                     alertAdapter.notifyItemChanged(position)
                 }
             }
 
-
-            // Change background color during swipe only if the status is "Pending"
-            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
                 val itemView = viewHolder.itemView
                 val paint = Paint()
+                val textPaint = Paint().apply {
+                    color = Color.WHITE
+                    textSize = 40f
+                    isAntiAlias = true
+                    textAlign = Paint.Align.LEFT
+                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                }
 
-                // Get the alert object
                 val alert = alertList[viewHolder.adapterPosition]
 
-                // Only allow color change if the status is "Pending"
                 if (alert.status == "Pending") {
                     if (dX > 0) {
-                        // Swipe Right (Accept) - Green color
-                        paint.color = Color.parseColor("#4CAF50")  // Green
+                        // Swipe Right (Accept)
+                        paint.color = Color.parseColor("#43A047") // Green
+                        c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat(), paint)
+                        c.drawText("Accept", itemView.left + 40f, itemView.top + itemView.height / 2f + 15f, textPaint)
                     } else if (dX < 0) {
-                        // Swipe Left (Decline) - Red color
-                        paint.color = Color.parseColor("#F44336")  // Red
+                        // Swipe Left (Decline)
+                        paint.color = Color.parseColor("#E53935") // Red
+                        c.drawRect(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
+                        c.drawText("Decline", itemView.right - 200f, itemView.top + itemView.height / 2f + 15f, textPaint)
                     }
-
-                    // Draw the background color
-                    c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
                 }
+
+                // Clamp swipe distance for smoother transition
+                val swipeLimit = itemView.width / 3f
+                val clampedDx = dX.coerceIn(-swipeLimit, swipeLimit)
+                super.onChildDraw(c, recyclerView, viewHolder, clampedDx, dY, actionState, isCurrentlyActive)
             }
         })
 
         itemTouchHelper.attachToRecyclerView(binding.alertRecyclerView)
     }
+
 
     private fun vibrateShort() {
         val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

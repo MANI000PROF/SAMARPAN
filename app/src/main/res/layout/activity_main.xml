@@ -34,27 +34,31 @@
     </LinearLayout>
 
     <!-- Notification Bell -->
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/alertBtn"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="8dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_speed="0.5"
+        app:lottie_rawRes="@raw/notification_bell"
         app:layout_constraintBottom_toBottomOf="@+id/headerLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/headerLayout"
-        app:srcCompat="@drawable/bell"
-        app:tint="?attr/colorOnBackground" />
+        app:layout_constraintTop_toTopOf="@+id/headerLayout" />
 
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/menuBtn"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="8dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/menu_animation"
+        app:lottie_speed="0.5"
         app:layout_constraintBottom_toBottomOf="@+id/headerLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/headerLayout"
-        app:srcCompat="@drawable/icon_menu"
-        app:tint="?attr/colorOnBackground" />
+        app:layout_constraintTop_toTopOf="@+id/headerLayout" />
 
     <!-- Category Icons -->
     <LinearLayout

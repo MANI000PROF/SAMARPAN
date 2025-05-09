@@ -21,6 +21,7 @@ import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
 import com.example.samarpan.Adapter.PostAdapter
 import com.example.samarpan.Adapter.PostElectronicsAdapter
+import com.example.samarpan.MainActivity
 import com.example.samarpan.Model.DonationPostsElectronics
 import com.example.samarpan.R
 import com.example.samarpan.databinding.ActivityHomeFragmentElectronicsBinding
@@ -81,6 +82,11 @@ class HomeFragmentElectronics : Fragment() {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             val addPostElectronicsBottomSheet = AddPostElectronicsBottomSheet()
             addPostElectronicsBottomSheet.show(parentFragmentManager, "AddPostElectronicsBottomSheet")
+        }
+        binding.nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            val showIcons = scrollY == 0
+            Log.d("ScrollCheck", "ScrollY: $scrollY — showIcons: $showIcons")
+            (activity as? MainActivity)?.setCategoryIconsVisibility(showIcons)
         }
     }
 

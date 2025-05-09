@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/placeholder"
+            android:src="@drawable/ic_profile"
             tools:ignore="ContentDescription" />
     </androidx.cardview.widget.CardView>
 
