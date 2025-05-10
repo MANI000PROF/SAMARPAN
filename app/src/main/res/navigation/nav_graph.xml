@@ -15,6 +15,11 @@
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
     <fragment
+        android:id="@+id/chatFragment2"
+        android:name="com.example.samarpan.Fragment.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" />
+    <fragment
         android:id="@+id/leaderBoardFragment2"
         android:name="com.example.samarpan.Fragment.LeaderBoardFragment"
         android:label="fragment_leader_board"

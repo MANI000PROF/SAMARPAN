@@ -1,15 +1,18 @@
 package com.example.samarpan.Adapter
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.samarpan.ChatActivity
 import com.example.samarpan.Model.Alert
 import com.example.samarpan.R
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +27,8 @@ class AlertAdapter(private val alertList: MutableList<Alert>) : RecyclerView.Ada
         val alertMessage: TextView = itemView.findViewById(R.id.alertMessage)
         val statusTextView: TextView = itemView.findViewById(R.id.statusTextView)
         val alertIcon: ImageView = itemView.findViewById(R.id.alertIcon)
+        val chatButton: Button = itemView.findViewById(R.id.chatButton)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertViewHolder {
@@ -66,11 +71,31 @@ class AlertAdapter(private val alertList: MutableList<Alert>) : RecyclerView.Ada
                 // Check if the status is still "Pending"
                 if (alert.status == "Pending") {
                     showStatusDialog(alert)
-                } else {
-                    Toast.makeText(context, "Status already changed", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+        if (alert.status == "Accepted") {
+            holder.chatButton.visibility = View.VISIBLE
+
+            holder.chatButton.setOnClickListener {
+                val context = holder.itemView.context
+                val receiverId = if (FirebaseAuth.getInstance().currentUser?.uid == alert.donorId)
+                    alert.requesterId else alert.donorId
+
+                val intent = Intent(context, ChatActivity::class.java).apply {
+                    putExtra("requestId", alert.requestId)
+                    putExtra("postId", alert.postId)
+                    putExtra("donorId", alert.donorId)
+                    putExtra("requesterId", alert.requesterId)
+                    putExtra("receiverId", receiverId)
+                }
+                context.startActivity(intent)
+
+            }
+        } else {
+            holder.chatButton.visibility = View.GONE
+        }
+
     }
 
     override fun getItemCount() = alertList.size

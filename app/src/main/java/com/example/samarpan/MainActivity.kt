@@ -21,6 +21,7 @@ import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.animation.AnimationUtils
 import com.airbnb.lottie.LottieAnimationView
+import com.example.samarpan.Fragment.ChatFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -109,7 +110,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.homeFragmentElectronics -> true
                 else -> false
             }
-
+            val showChatButton = when (destination.id) {
+                R.id.homeFragment2,
+                R.id.homeFragmentClothes,
+                R.id.homeFragmentElectronics -> true
+                else -> false
+            }
 
             if (showIcons) {
                 if (iconsLayout.visibility != View.VISIBLE) {
@@ -128,6 +134,7 @@ class MainActivity : AppCompatActivity() {
                     alertBtn.visibility = View.VISIBLE
                     alertBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
                 }
+
             } else {
                 iconsLayout.animate().alpha(0f).translationY(-iconsLayout.height.toFloat()).setDuration(300)
                     .withEndAction { iconsLayout.visibility = View.GONE }.start()
@@ -140,6 +147,18 @@ class MainActivity : AppCompatActivity() {
 
                 alertBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
                     .withEndAction { alertBtn.visibility = View.GONE }.start()
+            }
+
+            // Control visibility of chat button based on the fragment
+            val chatBtn = findViewById<View>(R.id.chatBtn)
+            if (showChatButton) {
+                if (chatBtn.visibility != View.VISIBLE) {
+                    chatBtn.visibility = View.VISIBLE
+                    chatBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
+                }
+            } else {
+                chatBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
+                    .withEndAction { chatBtn.visibility = View.GONE }.start()
             }
         }
 
@@ -163,6 +182,11 @@ class MainActivity : AppCompatActivity() {
                 R.id.profileFragment2 -> navController.navigate(R.id.profileFragment2)
             }
             true
+        }
+
+        findViewById<View>(R.id.chatBtn).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            navController.navigate(R.id.chatFragment2)
         }
 
         alertBtn.setOnClickListener { view ->

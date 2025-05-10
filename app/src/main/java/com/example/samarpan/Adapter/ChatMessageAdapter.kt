@@ -1,0 +1,126 @@
+package com.example.samarpan.Adapter
+
+import android.media.MediaPlayer
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.samarpan.Model.ChatMessage
+import com.example.samarpan.R
+import java.io.IOException
+
+class ChatMessageAdapter(
+    private val chatMessages: List<ChatMessage>,
+    private val currentUserId: String,
+    private val onMessageLongClick: (ChatMessage, Int) -> Unit
+) : RecyclerView.Adapter<ChatMessageAdapter.ChatViewHolder>() {
+
+    private var mediaPlayer: MediaPlayer? = null
+    private var currentlyPlayingPosition = -1
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
+        val layoutId = if (viewType == VIEW_TYPE_SENT) {
+            R.layout.item_chat_sent
+        } else {
+            R.layout.item_chat_received
+        }
+
+        val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
+        return ChatViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
+        val chatMessage = chatMessages[position]
+
+        if (!chatMessage.audioUrl.isNullOrEmpty()) {
+            // Audio message
+            holder.messageTextView.visibility = View.GONE
+            holder.audioLayout.visibility = View.VISIBLE
+            holder.audioDuration.text = "Audio"
+
+            holder.playButton.setImageResource(R.drawable.ic_play)
+
+            holder.itemView.setOnLongClickListener {
+                onMessageLongClick(chatMessages[position], position)
+                true
+            }
+
+            holder.playButton.setOnClickListener {
+                if (currentlyPlayingPosition == position) {
+                    stopAudio(holder)
+                } else {
+                    playAudio(chatMessage.audioUrl!!, holder)
+                    currentlyPlayingPosition = position
+                }
+            }
+
+        } else {
+            // Text message
+            holder.audioLayout.visibility = View.GONE
+            holder.messageTextView.visibility = View.VISIBLE
+            holder.messageTextView.text = chatMessage.message
+        }
+    }
+
+    override fun getItemCount(): Int = chatMessages.size
+
+    override fun getItemViewType(position: Int): Int {
+        val chatMessage = chatMessages[position]
+        return if (chatMessage.senderId == currentUserId) VIEW_TYPE_SENT else VIEW_TYPE_RECEIVED
+    }
+
+    inner class ChatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val messageTextView: TextView = view.findViewById(R.id.messageTextView)
+        val audioLayout: View = view.findViewById(R.id.audioMessageLayout)
+        val playButton: ImageView = view.findViewById(R.id.playButton)
+        val audioDuration: TextView = view.findViewById(R.id.audioDuration)
+    }
+
+    private fun playAudio(url: String, holder: ChatViewHolder) {
+        stopAudio(null)
+
+        mediaPlayer = MediaPlayer().apply {
+            try {
+                setDataSource(url)
+                prepare()
+                start()
+
+                holder.playButton.setImageResource(R.drawable.ic_pause)
+
+                setOnCompletionListener {
+                    holder.playButton.setImageResource(R.drawable.ic_play)
+                    currentlyPlayingPosition = -1
+                    releaseMediaPlayer()
+                }
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun stopAudio(holder: ChatViewHolder?) {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+            }
+            it.release()
+            mediaPlayer = null
+        }
+
+        holder?.playButton?.setImageResource(R.drawable.ic_play)
+        currentlyPlayingPosition = -1
+    }
+
+    private fun releaseMediaPlayer() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
+
+    companion object {
+        private const val VIEW_TYPE_SENT = 1
+        private const val VIEW_TYPE_RECEIVED = 2
+    }
+}

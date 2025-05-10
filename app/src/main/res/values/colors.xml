@@ -12,4 +12,6 @@
     <color name="foodColor">#BDB19E</color>
     <color name="electronicsColor">#BA918C</color>
     <color name="clothesColor">#92B7D3</color>
+    <color name="blue">#3b82f6</color>
+    <color name="light_gray">#f1f1f1</color>
 </resources>

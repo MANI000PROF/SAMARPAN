@@ -20,7 +20,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // Check if message contains a notification payload
         remoteMessage.notification?.let {
-            sendNotification(it.title ?: "New Alert", it.body ?: "You have a new alert.")
+            val title = it.title ?: "New Message"
+            val body = it.body ?: "You have a new message."
+            if (remoteMessage.data["type"] == "chat"){
+                sendNotification(title, body)
+            }
+            else {
+                sendNotification(it.title ?: "New Alert", it.body ?: "You have a new alert.")
+            }
         }
     }
 
