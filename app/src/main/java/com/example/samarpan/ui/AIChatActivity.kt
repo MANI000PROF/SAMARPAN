@@ -20,6 +20,7 @@ import java.util.Locale
 import android.media.MediaPlayer
 import com.example.samarpan.Fragment.AddPostBottomSheet
 import com.example.samarpan.R
+import com.example.samarpan.SavedPostsActivity
 import com.example.samarpan.SettingsActivity
 
 class AIChatActivity : AppCompatActivity() {
@@ -94,6 +95,7 @@ class AIChatActivity : AppCompatActivity() {
             CommandProcessor.ActionType.NAVIGATE_DONATE_CLOTHES -> navigateToDonation("Clothes")
             CommandProcessor.ActionType.NAVIGATE_DONATE_ELECTRONICS -> navigateToDonation("Electronics")
             CommandProcessor.ActionType.NAVIGATE_SAVED_LOCATIONS -> navigateToSavedLocations()
+            CommandProcessor.ActionType.NAVIGATE_SAVED_POSTS -> navigateToSavedPosts()
             CommandProcessor.ActionType.NONE -> { /* No action needed */ }
             CommandProcessor.ActionType.NAVIGATE_MY_CONTRIBUTIONS -> navigateToMyContributions()
             CommandProcessor.ActionType.NAVIGATE_ADD_POST -> navigateToAddPost()
@@ -127,6 +129,9 @@ class AIChatActivity : AppCompatActivity() {
         startActivity(Intent(this, AddPostBottomSheet::class.java))
     }
 
+    private fun navigateToSavedPosts() {
+        startActivity(Intent(this, SavedPostsActivity::class.java))
+    }
 
     private fun navigateToSettings() {
         startActivity(Intent(this, SettingsActivity::class.java))

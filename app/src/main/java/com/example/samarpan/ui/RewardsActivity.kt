@@ -1,12 +1,15 @@
 package com.example.samarpan.ui
 
+import android.animation.Animator
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -48,53 +51,105 @@ class RewardsActivity : AppCompatActivity() {
     }
 
     private fun loadUserInfo() {
-        val postsRefs = listOf(
-            "DonationPosts", "DonationPostsClothes", "DonationPostsElectronics"
-        )
-        var total = 0
-        var count = 0
-
-        for (refName in postsRefs) {
-            FirebaseDatabase.getInstance().getReference(refName)
-                .orderByChild("donorId").equalTo(currentUserId)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        total += snapshot.childrenCount.toInt()
-                        if (++count == postsRefs.size) {
-                            userDonations = total
-                            binding.totalDonations.text = "You've made $total donations"
-                            updateMilestones()
-
-                            // ✅ Show animation only if donation count > 0
-                            if (userDonations > 0) {
-                                binding.celebrationAnimation.apply {
-                                    visibility = android.view.View.VISIBLE
-                                    playAnimation()
-                                }
-                            } else {
-                                binding.celebrationAnimation.visibility = android.view.View.GONE
-                            }
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {}
-                })
-        }
-
+        // Load user profile info
         val userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId)
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 binding.userName.text = "Hello, ${snapshot.child("fullName").value ?: "User"}!"
                 Glide.with(this@RewardsActivity)
                     .load(snapshot.child("profileImageUrl").value)
-                    .placeholder(R.drawable.profile_placeholder)
+                    .placeholder(R.drawable.ic_profile)
                     .circleCrop()
                     .into(binding.profileImage)
             }
 
             override fun onCancelled(error: DatabaseError) {}
         })
+
+        // Load donation counts from all categories
+        val db = FirebaseDatabase.getInstance().reference
+        val refs = listOf(
+            db.child("DonationPosts"),
+            db.child("DonationPostsClothes"),
+            db.child("DonationPostsElectronics")
+        )
+
+        var completed = 0
+        var totalDonations = 0
+
+        fun checkDone() {
+            completed++
+            if (completed < refs.size) return
+
+            userDonations = totalDonations
+            binding.totalDonations.text = "You've made $totalDonations donations"
+            updateMilestones()
+
+            if (userDonations > 0) {
+                binding.celebrationAnimation.apply {
+                    visibility = View.VISIBLE
+                    playAnimation()
+                    addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationEnd(animation: Animator) {
+                            visibility = View.GONE
+                            removeAnimatorListener(this)
+                        }
+
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+                }
+            } else {
+                binding.celebrationAnimation.visibility = View.GONE
+            }
+        }
+
+        for (ref in refs) {
+            ref.orderByChild("donorId").equalTo(currentUserId)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        totalDonations += snapshot.childrenCount.toInt()
+                        checkDone()
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        checkDone()
+                    }
+                })
+        }
     }
+
+    private fun showRewardsForMilestone(milestone: Int) {
+        val rewardsContainer: LinearLayout = findViewById(R.id.rewardCouponsContainer)
+
+        // Clear previous rewards
+        rewardsContainer.removeAllViews()
+
+        // Example logic to add coupons based on milestone
+        when (milestone) {
+            1 -> {
+                val coupon = TextView(this)
+                coupon.text = "🎉 Coupon 1: 10% OFF on Next Donation"
+                rewardsContainer.addView(coupon)
+            }
+            2 -> {
+                val coupon = TextView(this)
+                coupon.text = "🎉 Coupon 2: Free Donation with Any Contribution"
+                rewardsContainer.addView(coupon)
+            }
+            3 -> {
+                val coupon = TextView(this)
+                coupon.text = "🎉 Coupon 3: Special Discount Voucher"
+                rewardsContainer.addView(coupon)
+            }
+            // Add more milestones and rewards as needed
+        }
+
+        // Show the rewards section
+        rewardsContainer.visibility = View.VISIBLE
+    }
+
 
     private fun loadLeaderboardRank() {
         FirebaseDatabase.getInstance().getReference("LeaderBoard")
@@ -121,19 +176,31 @@ class RewardsActivity : AppCompatActivity() {
 
         val colorOnSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
 
+        var highestUnlockedMilestone = 0
+
         for (milestone in milestones) {
             val view = inflater.inflate(R.layout.item_badge, binding.badgeContainer, false)
             val badgeText = view.findViewById<TextView>(R.id.badgeText)
             val badgeIcon = view.findViewById<ImageView>(R.id.badgeIcon)
 
             badgeText.text = "$milestone Donations"
-            val badgeRes = if (userDonations >= milestone) R.drawable.ic_badge_unlocked else R.drawable.ic_badge_locked
+            val isUnlocked = userDonations >= milestone
+            val badgeRes = if (isUnlocked) R.drawable.ic_badge_unlocked else R.drawable.ic_badge_locked
             badgeIcon.setImageResource(badgeRes)
             badgeIcon.setColorFilter(colorOnSurface, PorterDuff.Mode.SRC_IN)
-
             binding.badgeContainer.addView(view)
+
+            if (isUnlocked) {
+                highestUnlockedMilestone = milestone
+            }
+        }
+
+        // Show rewards only if a milestone is unlocked
+        if (highestUnlockedMilestone > 0) {
+            showRewardsForMilestone(highestUnlockedMilestone)
         }
     }
+
 
 
     private fun setupLeaderboardButton() {

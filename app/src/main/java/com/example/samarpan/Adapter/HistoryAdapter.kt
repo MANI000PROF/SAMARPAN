@@ -16,11 +16,6 @@ class HistoryAdapter(
     private val postList: List<UnifiedPost>
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    private var onItemLongClick: ((UnifiedPost) -> Unit)? = null
-
-    fun setOnItemLongClickListener(listener: (UnifiedPost) -> Unit) {
-        onItemLongClick = listener
-    }
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.foodImage)
@@ -29,13 +24,6 @@ class HistoryAdapter(
         val title: TextView = itemView.findViewById(R.id.foodTitle) // You can rename in XML later if needed
         val category: TextView = itemView.findViewById(R.id.categoryTextView) // Optional: show category tag
 
-        init {
-            itemView.setOnLongClickListener {
-                val post = postList[adapterPosition]
-                onItemLongClick?.invoke(post)
-                true
-            }
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {

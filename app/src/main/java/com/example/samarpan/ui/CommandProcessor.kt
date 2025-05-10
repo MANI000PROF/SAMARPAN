@@ -10,6 +10,7 @@ class CommandProcessor(private val context: Context) {
         NAVIGATE_DONATE_CLOTHES,
         NAVIGATE_DONATE_ELECTRONICS,
         NAVIGATE_SAVED_LOCATIONS,
+        NAVIGATE_SAVED_POSTS,
         NAVIGATE_MY_CONTRIBUTIONS,
         NAVIGATE_ADD_POST,
         NAVIGATE_SETTINGS,
@@ -60,6 +61,12 @@ class CommandProcessor(private val context: Context) {
                 BotResponse(
                     "You can view your saved locations in the 'Saved Locations' section.",
                     ActionType.NAVIGATE_SAVED_LOCATIONS
+                )
+            }
+            normalized.contains("posts", ignoreCase = true) || normalized.contains("saved", ignoreCase = true) -> {
+                BotResponse(
+                    "You can view your saved posts in the 'Saved Posts' section.",
+                    ActionType.NAVIGATE_SAVED_POSTS
                 )
             }
             // Command 4: Post a Donation

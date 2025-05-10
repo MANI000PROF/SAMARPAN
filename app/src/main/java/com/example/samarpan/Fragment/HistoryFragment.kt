@@ -1,13 +1,22 @@
 package com.example.samarpan.Fragment
 
-import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.samarpan.EditPostActivity
 import com.example.samarpan.Model.*
 import com.example.samarpan.adapter.HistoryAdapter
 import com.example.samarpan.databinding.FragmentHistoryBinding
@@ -26,6 +35,10 @@ class HistoryFragment : Fragment() {
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     private val cacheKey = "cachedHistoryPosts"
 
+    private lateinit var editIcon: Bitmap
+    private lateinit var deleteIcon: Bitmap
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,11 +48,7 @@ class HistoryFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        historyAdapter = HistoryAdapter(requireContext(), postList).apply {
-            setOnItemLongClickListener { post ->
-                showDeleteConfirmationDialog(post)
-            }
-        }
+        historyAdapter = HistoryAdapter(requireContext(), postList)
 
         binding.historyRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -64,6 +73,9 @@ class HistoryFragment : Fragment() {
         } else {
             loadFromCache()
         }
+
+        // Enable swipe gestures for editing and deleting posts
+        enableSwipeGestures()
     }
 
     private fun loadUserPosts() {
@@ -172,35 +184,98 @@ class HistoryFragment : Fragment() {
         })
     }
 
-    private fun showDeleteConfirmationDialog(post: UnifiedPost) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Post")
-            .setMessage("Are you sure you want to delete this post?")
-            .setPositiveButton("Yes") { _, _ -> deletePost(post) }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
+    private fun enableSwipeGestures() {
 
-    private fun deletePost(post: UnifiedPost) {
-        val database = FirebaseDatabase.getInstance()
-        val nodeMap = mapOf(
-            "Food" to "DonationPosts",
-            "Clothes" to "DonationPostsClothes",
-            "Electronics" to "DonationPostsElectronics"
-        )
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
 
-        val node = nodeMap[post.category]
-        if (node != null) {
-            database.getReference(node)
-                .child(post.postId ?: "")
-                .removeValue()
-                .addOnSuccessListener {
-                    postList.remove(post)
-                    historyAdapter.notifyDataSetChanged()
-                    saveToCache(postList)
-                    Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show()
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val post = postList[position]  // Replace with your actual list of posts
+                viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                // Handle swipe actions
+                if (direction == ItemTouchHelper.RIGHT) {
+                    // Swipe Right -> Edit Post
+                    val intent = Intent(requireContext(), EditPostActivity::class.java).apply {
+                        putExtra("postId", post.postId)
+                        putExtra("profileName", post.profileName)
+                        putExtra("location", post.location)
+                        putExtra("title", post.title)
+                        putExtra("description", post.description)
+                        putExtra("imageUrl", post.imageUrl)
+                        putExtra("category", post.category)
+                    }
+                    historyAdapter.notifyItemChanged(position)
+                    startActivity(intent)
+                } else if (direction == ItemTouchHelper.LEFT) {
+                    // Swipe Left -> Delete Post
+                    post.postId?.let {
+                        FirebaseDatabase.getInstance().getReference("DonationPosts").child(it)
+                            .removeValue()
+                            .addOnSuccessListener {
+                                postList.removeAt(position)
+                                historyAdapter.notifyItemRemoved(position)
+                                Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Failed to delete post", Toast.LENGTH_SHORT)
+                                    .show()
+                                historyAdapter.notifyItemChanged(position)
+                            }
+                    }
                 }
-        }
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                val itemView = viewHolder.itemView
+                val paint = Paint()
+                val position = viewHolder.adapterPosition
+                // ✅ Prevent crash by ignoring invalid positions
+                if (position == RecyclerView.NO_POSITION || position >= postList.size) {
+                    return
+                }
+                val textPaint = Paint().apply {
+                    color = Color.WHITE
+                    textSize = 40f
+                    isAntiAlias = true
+                    textAlign = Paint.Align.LEFT
+                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                }
+
+                postList[viewHolder.adapterPosition]
+
+                if (dX > 0) {
+                    // Swipe Right (Edit)
+                    paint.color = Color.parseColor("#2c8bc9") // blue
+                    c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat(), paint)
+                    c.drawText("Edit", itemView.left + 40f, itemView.top + itemView.height / 2f + 15f, textPaint)
+                } else if (dX < 0) {
+                    // Swipe Left (Delete)
+                    paint.color = Color.parseColor("#E53935") // Red
+                    c.drawRect(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
+                    c.drawText("Delete", itemView.right - 200f, itemView.top + itemView.height / 2f + 15f, textPaint)
+                }
+
+                // Clamp swipe distance for smoother transition
+                val swipeLimit = itemView.width / 3f
+                val clampedDx = dX.coerceIn(-swipeLimit, swipeLimit)
+                super.onChildDraw(c, recyclerView, viewHolder, clampedDx, dY, actionState, isCurrentlyActive)
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(binding.historyRecyclerView)  // Attach the swipe gesture to your RecyclerView
     }
 
     private fun updateUI() {

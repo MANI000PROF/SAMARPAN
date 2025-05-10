@@ -28,6 +28,9 @@
         android:theme="@style/Theme.SAMARPAN"
         tools:targetApi="31">
         <activity
+            android:name=".EditPostActivity"
+            android:exported="false" />
+        <activity
             android:name=".SavedPostsActivity"
             android:exported="false" />
 

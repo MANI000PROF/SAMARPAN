@@ -208,13 +208,4 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
     }
 
 
-    private fun vibrateShort() {
-        val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrator.vibrate(50)
-        }
-    }
-
 }
