@@ -21,6 +21,7 @@ import com.example.samarpan.databinding.FragmentChatBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.example.samarpan.R
+import com.google.android.material.snackbar.Snackbar
 
 class ChatFragment : Fragment() {
 
@@ -139,17 +140,34 @@ class ChatFragment : Fragment() {
     }
 
     private fun generateChatId(user1: String, user2: String): String {
-        return if (user1 < user2) "${user1}_$user2" else "${user2}_$user1"
+        return if (user1 < user2) "$user1-$user2" else "$user2-$user1"  // Use hyphen instead of underscore
     }
 
     private fun deleteChatForUser(otherUserId: String, position: Int) {
         val chatId = generateChatId(currentUserId, otherUserId)
+        val chatRef = databaseRef.child("chats").child(chatId)
 
-        databaseRef.child("chats").child(chatId).removeValue()
-            .addOnSuccessListener {
+        // Temporarily hold deleted chat data for undo
+        chatRef.get().addOnSuccessListener { snapshot ->
+            val deletedChatData = snapshot.value
+
+            // Delete entire chat for both users
+            chatRef.removeValue().addOnSuccessListener {
                 chatUserIds.removeAt(position)
                 adapter.notifyItemRemoved(position)
+
+                // Show Snackbar to undo deletion
+                Snackbar.make(binding.root, "Chat deleted for both users", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        if (deletedChatData != null) {
+                            chatRef.setValue(deletedChatData)
+                            chatUserIds.add(position, otherUserId)
+                            adapter.notifyItemInserted(position)
+                        }
+                    }
+                    .show()
             }
+        }
     }
 
 
