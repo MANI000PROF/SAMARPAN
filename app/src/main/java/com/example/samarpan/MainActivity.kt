@@ -221,6 +221,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId != null) {
+            FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserId)
+                .child("isOnline").setValue(true)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId != null) {
+            FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserId)
+                .child("isOnline").setValue(false)
+        }
+    }
+
     fun setCategoryIconsVisibility(show: Boolean) {
         val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons) ?: return
 

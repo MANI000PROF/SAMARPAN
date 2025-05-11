@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.example.samarpan.R
 import com.google.android.material.snackbar.Snackbar
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class ChatFragment : Fragment() {
 
@@ -48,7 +49,9 @@ class ChatFragment : Fragment() {
         databaseRef = FirebaseDatabase.getInstance().reference
 
         setupRecyclerView()
-        loadChatUsers()
+        setupSwipeRefresh()
+
+        loadChatUsers() // Load initial chat list
     }
 
     private fun setupRecyclerView() {
@@ -170,7 +173,6 @@ class ChatFragment : Fragment() {
         }
     }
 
-
     private fun archiveChat(otherUserId: String) {
         // This is a mock operation — just a placeholder for future enhancement
         Toast.makeText(requireContext(), "Chat archived", Toast.LENGTH_SHORT).show()
@@ -191,8 +193,17 @@ class ChatFragment : Fragment() {
                 }
             }
             adapter.notifyDataSetChanged()
+            binding.swipeRefreshLayout.isRefreshing = false // Hide refresh animation after loading
         }.addOnFailureListener {
             // handle failure (optional)
+            binding.swipeRefreshLayout.isRefreshing = false // Hide refresh animation in case of failure
+        }
+    }
+
+    private fun setupSwipeRefresh() {
+        // Set up swipe to refresh functionality
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            loadChatUsers() // Reload chat list when swipe to refresh is triggered
         }
     }
 

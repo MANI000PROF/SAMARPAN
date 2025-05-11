@@ -18,13 +18,25 @@ class CommandProcessor(private val context: Context) {
         SWITCH_CATEGORY_FOOD,
         SWITCH_CATEGORY_CLOTHES,
         SWITCH_CATEGORY_ELECTRONICS,
+        MESSAGE_USER,
         NONE
     }
 
-    data class BotResponse(val reply: String, val action: ActionType = ActionType.NONE)
+    data class BotResponse(val reply: String,
+                           val action: ActionType = ActionType.NONE,
+                           val targetName: String? = null
+    )
+
 
     fun processInput(input: String): BotResponse {
         val normalized = input.trim().lowercase()
+
+        val messageRegex = Regex("^message\\s+(\\w+)", RegexOption.IGNORE_CASE)
+        val matchResult = messageRegex.find(normalized)
+        if (matchResult != null) {
+            val targetName = matchResult.groupValues[1]
+            return BotResponse("Opening chat with $targetName...", ActionType.MESSAGE_USER, targetName)
+        }
 
         return when {
 

@@ -18,10 +18,16 @@ import android.speech.RecognizerIntent
 import android.widget.Toast
 import java.util.Locale
 import android.media.MediaPlayer
+import com.example.samarpan.ChatActivity
+import com.example.samarpan.EditPostActivity
 import com.example.samarpan.Fragment.AddPostBottomSheet
 import com.example.samarpan.R
 import com.example.samarpan.SavedPostsActivity
 import com.example.samarpan.SettingsActivity
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class AIChatActivity : AppCompatActivity() {
 
@@ -83,13 +89,13 @@ class AIChatActivity : AppCompatActivity() {
             chatAdapter.addMessage(ChatMessage(botResponse.reply, isUser = false))
             binding.chatRecyclerView.scrollToPosition(chatAdapter.itemCount - 1)
             binding.typingAnimation.visibility = View.GONE
-            handleAction(botResponse.action)
+            handleAction(botResponse)
             scrollToBottom()
         }, 1000)
     }
 
-    private fun handleAction(action: CommandProcessor.ActionType) {
-        when (action) {
+    private fun handleAction(botResponse: CommandProcessor.BotResponse) {
+        when (botResponse.action) {
             CommandProcessor.ActionType.NAVIGATE_REWARDS -> navigateToRewards()
             CommandProcessor.ActionType.NAVIGATE_DONATE_FOOD -> navigateToDonation("Food")
             CommandProcessor.ActionType.NAVIGATE_DONATE_CLOTHES -> navigateToDonation("Clothes")
@@ -104,8 +110,37 @@ class AIChatActivity : AppCompatActivity() {
             CommandProcessor.ActionType.SWITCH_CATEGORY_FOOD -> switchToCategoryFood()
             CommandProcessor.ActionType.SWITCH_CATEGORY_CLOTHES -> switchToCategoryClothes()
             CommandProcessor.ActionType.SWITCH_CATEGORY_ELECTRONICS -> switchToCategoryElectronics()
+            CommandProcessor.ActionType.MESSAGE_USER -> {
+                botResponse.targetName?.let { openChatWithUser(it) }
+            }
         }
     }
+
+
+    private fun openChatWithUser(name: String) {
+        val usersRef = FirebaseDatabase.getInstance().getReference("users")
+        usersRef.orderByChild("fullName").equalTo(name).addListenerForSingleValueEvent(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (userSnapshot in snapshot.children) {
+                        val receiverId = userSnapshot.child("id").value.toString()
+                        val intent = Intent(this@AIChatActivity, ChatActivity::class.java)
+                        intent.putExtra("receiverId", receiverId)
+                        startActivity(intent)
+                        return
+                    }
+                } else {
+                    Toast.makeText(this@AIChatActivity, "User '$name' not found.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@AIChatActivity, "Error fetching user info.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 
     private fun navigateToRewards() {
         startActivity(Intent(this, RewardsActivity::class.java))

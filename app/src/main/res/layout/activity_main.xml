@@ -160,7 +160,9 @@
         android:contentDescription="Chat Page"
         android:src="@drawable/ic_chat"
         app:layout_constraintBottom_toTopOf="@+id/cardView"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="?attr/colorOnSurface"
+        android:backgroundTint="@color/teal_700"/>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"

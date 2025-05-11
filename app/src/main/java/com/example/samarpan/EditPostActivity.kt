@@ -23,6 +23,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.database.FirebaseDatabase
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.label.ImageLabel
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import java.io.File
@@ -158,30 +159,95 @@ class EditPostActivity : AppCompatActivity() {
         }
     }
 
-    private fun analyzeImageWithMLKit(bitmap: Bitmap) {
-        if (!isGooglePlayServicesAvailable()) {
-            Toast.makeText(this, "Google Play Services required for ML Kit.", Toast.LENGTH_SHORT).show()
+    private fun analyzeImageWithMLKit(bitmap: Bitmap?) {
+        if (bitmap == null) {
+            Toast.makeText(this, "Failed to process image. Bitmap is null.", Toast.LENGTH_SHORT).show()
+            Log.e("MLKit", "Bitmap is null. Cannot analyze image.")
             return
         }
 
-        val image = InputImage.fromBitmap(bitmap, 0)
-        val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+        if (!isGooglePlayServicesAvailable()) {
+            Toast.makeText(this, "Google Play Services required for ML Kit.", Toast.LENGTH_LONG).show()
+            return
+        }
 
-        labeler.process(image)
-            .addOnSuccessListener { labels ->
-                val isFood = labels.any { it.text.contains("food", ignoreCase = true) && it.confidence >= 0.8 }
-                if (isFood) {
-                    postImage.setImageBitmap(bitmap)
-                    newImageBitmap = bitmap
-                    Toast.makeText(this, "Food detected. Ready to upload!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "No food detected.", Toast.LENGTH_SHORT).show()
+        try {
+            val image = InputImage.fromBitmap(bitmap, 0)
+            val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+
+            labeler.process(image)
+                .addOnSuccessListener { labels ->
+                    if (labels.isNotEmpty()) {
+                        when (postCategory) {
+                            "Food" -> analyzeFoodImage(labels, bitmap)
+                            "Clothes" -> analyzeClothesImage(labels, bitmap)
+                            "Electronics" -> analyzeElectronicsImage(labels, bitmap)
+                            else -> {
+                                Toast.makeText(this, "Category not recognized for image analysis.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "No labels detected. Try again.", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Image analysis failed.", Toast.LENGTH_SHORT).show()
-            }
+                .addOnFailureListener { e ->
+                    Log.e("MLKit", "Image labeling failed: ${e.message}")
+                    Toast.makeText(this, "Failed to analyze image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: Exception) {
+            Log.e("MLKit", "Exception in ML Kit: ${e.message}")
+            Toast.makeText(this, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private fun analyzeFoodImage(labels: List<ImageLabel>, bitmap: Bitmap) {
+        val foodKeywords = listOf("food", "fruit", "vegetable", "meal", "dish", "snack", "drink", "beverage")
+        val detectedFood = labels.firstOrNull { label ->
+            foodKeywords.any { keyword -> label.text.contains(keyword, ignoreCase = true) } && label.confidence >= 0.8
+        }
+
+        if (detectedFood != null) {
+            postImage.setImageBitmap(bitmap)
+            newImageBitmap = bitmap
+            Toast.makeText(this, "Food detected. Ready to upload!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "No food detected.", Toast.LENGTH_SHORT).show()
+            Log.d("MLKit", "Detected labels: ${labels.joinToString { "${it.text} (${it.confidence})" }}")
+        }
+    }
+
+    private fun analyzeClothesImage(labels: List<ImageLabel>, bitmap: Bitmap) {
+        val clothesKeywords = listOf("clothing", "apparel", "shirt", "pants", "jacket", "dress", "jeans", "fabric")
+        val detectedClothes = labels.firstOrNull { label ->
+            clothesKeywords.any { keyword -> label.text.contains(keyword, ignoreCase = true) } && label.confidence >= 0.6
+        }
+
+        if (detectedClothes != null) {
+            postImage.setImageBitmap(bitmap)
+            newImageBitmap = bitmap
+            Toast.makeText(this, "Clothes detected. Ready to upload!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "No clothes detected.", Toast.LENGTH_SHORT).show()
+            Log.d("MLKit", "Detected labels: ${labels.joinToString { "${it.text} (${it.confidence})" }}")
+        }
+    }
+
+    private fun analyzeElectronicsImage(labels: List<ImageLabel>, bitmap: Bitmap) {
+        val electronicsKeywords = listOf("electronics", "phone", "laptop", "tablet", "camera", "television", "headphones", "gadget")
+        val detectedElectronics = labels.firstOrNull { label ->
+            electronicsKeywords.any { keyword -> label.text.contains(keyword, ignoreCase = true) } && label.confidence >= 0.7
+        }
+
+        if (detectedElectronics != null) {
+            postImage.setImageBitmap(bitmap)
+            newImageBitmap = bitmap
+            Toast.makeText(this, "Electronics detected. Ready to upload!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "No electronics detected.", Toast.LENGTH_SHORT).show()
+            Log.d("MLKit", "Detected labels: ${labels.joinToString { "${it.text} (${it.confidence})" }}")
+        }
+    }
+
 
     private fun uploadImageToCloudinary(bitmap: Bitmap) {
         val tempFile = File(cacheDir, "temp_image.jpg")

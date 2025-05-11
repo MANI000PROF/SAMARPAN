@@ -14,6 +14,8 @@ import java.io.IOException
 class ChatMessageAdapter(
     private val chatMessages: List<ChatMessage>,
     private val currentUserId: String,
+    private val timestampVisibilityMap: Map<String, Boolean>,
+    private val replyResolver: (String) -> String,
     private val onMessageLongClick: (ChatMessage, Int) -> Unit
 ) : RecyclerView.Adapter<ChatMessageAdapter.ChatViewHolder>() {
 
@@ -28,40 +30,66 @@ class ChatMessageAdapter(
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
+
         return ChatViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val chatMessage = chatMessages[position]
+        // Common long click listener for delete
+        holder.itemView.setOnLongClickListener {
+            val adapterPosition = holder.adapterPosition
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                onMessageLongClick(chatMessages[adapterPosition], adapterPosition)
+            }
+            true
+        }
+
+        // Handle Quoted Message (Reply)
+        if (chatMessage.replyToMessageId != null) {
+            // Fetch the original message using the `replyToMessageId`
+            val repliedMessage = getRepliedMessageById(chatMessage.replyToMessageId!!)
+            holder.quotedMessageTextView.visibility = View.VISIBLE
+            holder.quotedMessageTextView.text = repliedMessage?.message ?: "Message not found"
+        } else {
+            holder.quotedMessageTextView.visibility = View.GONE
+        }
 
         if (!chatMessage.audioUrl.isNullOrEmpty()) {
-            // Audio message
             holder.messageTextView.visibility = View.GONE
             holder.audioLayout.visibility = View.VISIBLE
             holder.audioDuration.text = "Audio"
 
             holder.playButton.setImageResource(R.drawable.ic_play)
-
-            holder.itemView.setOnLongClickListener {
-                onMessageLongClick(chatMessages[position], position)
-                true
-            }
-
             holder.playButton.setOnClickListener {
-                if (currentlyPlayingPosition == position) {
-                    stopAudio(holder)
-                } else {
-                    playAudio(chatMessage.audioUrl!!, holder)
-                    currentlyPlayingPosition = position
+                val adapterPosition = holder.adapterPosition
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    if (currentlyPlayingPosition == adapterPosition) {
+                        stopAudio(holder)
+                    } else {
+                        playAudio(chatMessage.audioUrl!!, holder)
+                        currentlyPlayingPosition = adapterPosition
+                    }
                 }
             }
-
         } else {
-            // Text message
             holder.audioLayout.visibility = View.GONE
             holder.messageTextView.visibility = View.VISIBLE
             holder.messageTextView.text = chatMessage.message
         }
+
+        // Handle the timestamp visibility and background
+        if (timestampVisibilityMap[chatMessage.replyToMessageId] == true) {
+            holder.timestampTextView.visibility = View.VISIBLE
+            holder.timestampTextView.text = chatMessage.timestamp.toString()
+        } else {
+            holder.timestampTextView.visibility = View.GONE
+        }
+    }
+
+    // Helper function to get the replied message (this can be fetched from your data source)
+    private fun getRepliedMessageById(replyToMessageId: String): ChatMessage? {
+        return chatMessages.find { it.replyToMessageId == replyToMessageId }
     }
 
     override fun getItemCount(): Int = chatMessages.size
@@ -76,6 +104,8 @@ class ChatMessageAdapter(
         val audioLayout: View = view.findViewById(R.id.audioMessageLayout)
         val playButton: ImageView = view.findViewById(R.id.playButton)
         val audioDuration: TextView = view.findViewById(R.id.audioDuration)
+        val timestampTextView: TextView = view.findViewById(R.id.timestampTextView)
+        val quotedMessageTextView: TextView = view.findViewById(R.id.quotedMessageTextView)
     }
 
     private fun playAudio(url: String, holder: ChatViewHolder) {

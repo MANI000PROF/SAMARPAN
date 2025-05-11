@@ -2,6 +2,9 @@ package com.example.samarpan
 
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
@@ -9,12 +12,16 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
 import com.example.samarpan.Adapter.ChatMessageAdapter
 import com.example.samarpan.Model.ChatMessage
 import com.example.samarpan.databinding.ActivityChatBinding
@@ -23,6 +30,9 @@ import com.google.firebase.database.*
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatActivity : AppCompatActivity() {
 
@@ -42,6 +52,8 @@ class ChatActivity : AppCompatActivity() {
     private var mediaRecorder: MediaRecorder? = null
     private var audioFilePath: String = ""
     private var isRecording = false
+    private val timestampVisibilityMap = mutableMapOf<String, Boolean>()
+    private var replyToMessage: ChatMessage? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,11 +177,33 @@ class ChatActivity : AppCompatActivity() {
     private fun fetchReceiverInfo() {
         val userRef = FirebaseDatabase.getInstance().getReference("users").child(receiverId)
         userRef.keepSynced(true)
-        userRef.get().addOnSuccessListener { snapshot ->
-            val fullName = snapshot.child("fullName").value?.toString() ?: "User"
-            binding.userTitle.text = fullName
-        }
+        userRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val fullName = snapshot.child("fullName").value?.toString() ?: "User"
+                val profileUrl = snapshot.child("profileImageUrl").value?.toString()
+                val isOnline = snapshot.child("online").getValue(Boolean::class.java) ?: false
+
+                binding.userTitle.text = fullName
+
+                if (isOnline) {
+                    binding.onlineStatus.visibility = View.VISIBLE
+                } else {
+                    binding.onlineStatus.visibility = View.GONE
+                }
+
+                if (!profileUrl.isNullOrEmpty()) {
+                    Glide.with(this@ChatActivity)
+                        .load(profileUrl)
+                        .placeholder(R.drawable.ic_profile)
+                        .circleCrop()
+                        .into(binding.profileImage)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
+
 
     private fun listenToTypingStatus() {
         val typingRef = databaseRef.child("chats").child(chatId).child("typing").child(receiverId)
@@ -205,6 +239,7 @@ class ChatActivity : AppCompatActivity() {
                     messageList.removeAt(position)
                     messageKeyList.removeAt(position)
                     chatMessageAdapter.notifyItemRemoved(position)
+                    chatMessageAdapter.notifyItemRangeChanged(position, messageList.size)
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -213,7 +248,14 @@ class ChatActivity : AppCompatActivity() {
 
 
     private fun setupRecyclerView() {
-        chatMessageAdapter = ChatMessageAdapter(messageList, senderId) { message, position ->
+        chatMessageAdapter = ChatMessageAdapter(
+            messageList,
+            senderId,
+            timestampVisibilityMap,
+            replyResolver = { replyId ->
+                messageList.find { it.replyToMessageId == replyId }?.message ?: "Replied message"
+            }
+        ) { message, position ->
             val key = messageKeyList.getOrNull(position)
             key?.let { showDeleteConfirmation(message, it, position) }
         }
@@ -224,6 +266,88 @@ class ChatActivity : AppCompatActivity() {
             }
             adapter = chatMessageAdapter
         }
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val message = messageList[position]
+
+                if (direction == ItemTouchHelper.RIGHT) {
+                    // Reply to this message
+                    viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    enterReplyMode(message)
+                } else if (direction == ItemTouchHelper.LEFT) {
+                    // Show timestamp
+                    showTimestampTemporarily(viewHolder.itemView, message.timestamp)
+                    chatMessageAdapter.notifyItemChanged(position) // Reset swipe
+                }
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float, dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView = viewHolder.itemView
+
+                    if (dX < 0) {
+                        // Swipe left — show timestamp
+                        val paint = Paint().apply {
+                            color = Color.GRAY
+                            textSize = 36f
+                            textAlign = Paint.Align.RIGHT
+                        }
+
+                        val timeText = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(messageList[viewHolder.adapterPosition].timestamp))
+                        c.drawText(timeText, itemView.right - 32f, itemView.top + 60f, paint)
+                    } else if (dX > 0) {
+                        // Swipe right — show reply icon
+                        val icon = ContextCompat.getDrawable(this@ChatActivity, R.drawable.ic_reply)
+                        icon?.setBounds(itemView.left + 32, itemView.top + 32, itemView.left + 96, itemView.bottom - 32)
+                        icon?.draw(c)
+                    }
+
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                }
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewChat)
+
+    }
+
+    private fun enterReplyMode(message: ChatMessage) {
+        replyToMessage = message
+        binding.replyLayout.visibility = View.VISIBLE
+        binding.replyText.text = message.message.ifEmpty { "Audio message" }
+
+        binding.cancelReply.setOnClickListener {
+            replyToMessage = null
+            binding.replyLayout.visibility = View.GONE
+        }
+    }
+
+    private fun showTimestampTemporarily(view: View, timestamp: Long) {
+        val key = messageKeyList.getOrNull(binding.recyclerViewChat.getChildAdapterPosition(view)) ?: return
+        timestampVisibilityMap[key] = true
+        chatMessageAdapter.notifyDataSetChanged()
+
+        view.postDelayed({
+            timestampVisibilityMap[key] = false
+            chatMessageAdapter.notifyDataSetChanged()
+        }, 1500)
     }
 
     private fun listenForMessages() {
@@ -310,11 +434,16 @@ class ChatActivity : AppCompatActivity() {
             senderId = senderId,
             receiverId = receiverId,
             message = text,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            replyToMessageId = replyToMessage?.replyToMessageId // Add reply message ID to differentiate
         )
 
         val newMsgRef = messagesRef.push()
         newMsgRef.setValue(message)
+
+        // Hide the reply layout after sending the message
+        binding.replyLayout.visibility = View.GONE
+        replyToMessage = null  // Reset the reply message state
 
         // Update participants list
         databaseRef.child("chats").child(chatId).child("participants")
@@ -332,8 +461,8 @@ class ChatActivity : AppCompatActivity() {
                 sendChatPushNotification(text)
             }
         }
-
     }
+
 
     override fun onDestroy() {
         messageListener?.let { messagesRef.removeEventListener(it) }

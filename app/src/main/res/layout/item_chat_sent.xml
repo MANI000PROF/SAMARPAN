@@ -17,6 +17,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Quoted message for replies -->
+        <TextView
+            android:id="@+id/quotedMessageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/reply_background"
+            android:padding="6dp"
+            android:textColor="@android:color/darker_gray"
+            android:textStyle="italic"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Quoted message goes here" />
+
         <LinearLayout
             android:id="@+id/textMessageLayout"
             android:orientation="vertical"
@@ -57,6 +71,22 @@
                 android:textColor="@android:color/white"
                 android:text="0:00" />
         </LinearLayout>
+
+        <!-- Timestamp shown in background when swiped -->
+        <TextView
+            android:id="@+id/timestampTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:alpha="0.3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            tools:text="10:45 AM" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
