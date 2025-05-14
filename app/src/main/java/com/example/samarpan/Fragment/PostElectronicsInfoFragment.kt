@@ -10,6 +10,7 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +18,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.example.samarpan.FullScreenImageActivity
 import com.example.samarpan.FullScreenMapActivity
 import com.example.samarpan.Model.Alert
 import com.example.samarpan.Model.DonationPostsElectronics
@@ -95,7 +97,16 @@ class PostElectronicsInfoFragment : Fragment() {
             showFullScreenMap()
         }
 
-        // Handle "Request Food" button click
+        val postImageView = view.findViewById<ImageView>(R.id.postImage)
+
+        postImageView.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val intent = Intent(requireContext(), FullScreenImageActivity::class.java)
+            intent.putExtra("image_url", post.electronicsImage) // Replace with your actual image URL
+            startActivity(intent)
+        }
+
+        // Handle "Request Electronics" button click
         binding.requestElectronicsBtn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             sendElectronicsRequest()

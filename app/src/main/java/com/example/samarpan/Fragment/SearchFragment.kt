@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import android.widget.EditText
 import android.text.Editable
 import android.text.TextWatcher
-
+import android.widget.Toast
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -45,7 +47,10 @@ class SearchFragment : Fragment() {
         recyclerView = view.findViewById(R.id.searchRecyclerView)
         searchView = view.findViewById(R.id.searchView)
 
-        searchAdapter = SearchAdapter(filteredList)
+        searchAdapter = SearchAdapter(filteredList) { selectedPost ->
+            navigateToPostInfo(selectedPost)
+        }
+
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         recyclerView.adapter = searchAdapter
 
@@ -69,6 +74,7 @@ class SearchFragment : Fragment() {
         setupSearchBar()
     }
 
+
     private fun setupSearchBar() {
         searchView.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -77,6 +83,77 @@ class SearchFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun navigateToPostInfo(post: UnifiedPost) {
+        when (post.category) {
+            "Food" -> {
+                val foodPost = DonationPosts(
+                    postId = post.postId,
+                    profileName = post.profileName,
+                    location = post.location,
+                    foodTitle = post.title,
+                    foodDescription = post.description,
+                    foodImage = post.imageUrl,
+                    latitude = post.latitude,
+                    longitude = post.longitude,
+                    donorId = post.donorId,
+                    timestamp = post.timestamp,
+                    userId = post.userId,
+                    category = post.category
+                )
+
+                val bundle = Bundle()
+                bundle.putSerializable("post_data", foodPost)
+                findNavController().navigate(R.id.action_searchFragment2_to_postInfoFragment, bundle)
+            }
+
+            "Clothes" -> {
+                val clothesPost = DonationPostsClothes(
+                    postId = post.postId,
+                    profileName = post.profileName,
+                    location = post.location,
+                    clothesTitle = post.title,
+                    clothesDescription = post.description,
+                    clothesImage = post.imageUrl,
+                    latitude = post.latitude,
+                    longitude = post.longitude,
+                    donorId = post.donorId,
+                    timestamp = post.timestamp,
+                    userId = post.userId,
+                    category = post.category
+                )
+
+                val bundle = Bundle()
+                bundle.putSerializable("post_data", clothesPost)
+                findNavController().navigate(R.id.action_searchFragment2_to_postClothesInfoFragment, bundle)
+            }
+
+            "Electronics" -> {
+                val electronicsPost = DonationPostsElectronics(
+                    postId = post.postId,
+                    profileName = post.profileName,
+                    location = post.location,
+                    electronicsTitle = post.title,
+                    electronicsDescription = post.description,
+                    electronicsImage = post.imageUrl,
+                    latitude = post.latitude,
+                    longitude = post.longitude,
+                    donorId = post.donorId,
+                    timestamp = post.timestamp,
+                    userId = post.userId,
+                    category = post.category
+                )
+
+                val bundle = Bundle()
+                bundle.putSerializable("post_data", electronicsPost)
+                findNavController().navigate(R.id.action_searchFragment2_to_postElectronicsInfoFragment, bundle)
+            }
+
+            else -> {
+                Toast.makeText(requireContext(), "Unsupported category: ${post.category}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 
@@ -101,6 +178,9 @@ class SearchFragment : Fragment() {
                                 description = post.foodDescription,
                                 imageUrl = post.foodImage,
                                 location = post.location,
+                                latitude = post.latitude,
+                                longitude = post.longitude,
+                                userId = post.userId,
                                 profileName = post.profileName,
                                 timestamp = post.timestamp,
                                 category = "Food"
@@ -131,6 +211,9 @@ class SearchFragment : Fragment() {
                                 description = post.clothesDescription,
                                 imageUrl = post.clothesImage,
                                 location = post.location,
+                                latitude = post.latitude,
+                                longitude = post.longitude,
+                                userId = post.userId,
                                 profileName = post.profileName,
                                 timestamp = post.timestamp,
                                 category = "Clothes"
@@ -161,6 +244,9 @@ class SearchFragment : Fragment() {
                                 description = post.electronicsDescription,
                                 imageUrl = post.electronicsImage,
                                 location = post.location,
+                                latitude = post.latitude,
+                                longitude = post.longitude,
+                                userId = post.userId,
                                 profileName = post.profileName,
                                 timestamp = post.timestamp,
                                 category = "Electronics"
@@ -212,6 +298,7 @@ class SearchFragment : Fragment() {
         editor.putString(cacheKey, json)
         editor.apply()
     }
+
 
     private fun loadFromCache() {
         val prefs = requireContext().getSharedPreferences("SearchCache", Context.MODE_PRIVATE)

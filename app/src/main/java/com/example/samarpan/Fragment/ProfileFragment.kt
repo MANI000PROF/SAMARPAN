@@ -2,6 +2,7 @@ package com.example.samarpan.Fragment
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -31,6 +32,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
+import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.abs
@@ -162,35 +164,79 @@ class ProfileFragment : Fragment() {
     }
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { uploadImageToCloudinary(it) }
+        uri?.let { startCrop(it) }
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val bitmap = result.data?.extras?.get("data") as? Bitmap
-            bitmap?.let { saveTempBitmapAndUpload(it) }
+            bitmap?.let {
+                val uri = saveTempBitmapAndGetUri(it)
+                uri?.let { startCrop(it) }
+            }
         }
     }
+
+    private val cropImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val resultUri = UCrop.getOutput(result.data!!)
+            resultUri?.let { uploadImageToCloudinary(it) }
+        }
+    }
+    private fun startCrop(sourceUri: Uri) {
+        val destinationUri = Uri.fromFile(File(requireContext().cacheDir, "cropped_image.jpg"))
+        val options = UCrop.Options().apply {
+            setCompressionQuality(90)
+            setFreeStyleCropEnabled(true)
+        }
+
+        val uCrop = UCrop.of(sourceUri, destinationUri)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(800, 800)
+            .withOptions(options)
+
+        cropImageLauncher.launch(uCrop.getIntent(requireContext()))
+    }
+
 
     private fun pickImageFromGallery() {
         galleryLauncher.launch("image/*")
     }
 
-    private fun captureImageFromCamera() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        cameraLauncher.launch(intent)
+    private val requestCameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            launchCamera()
+        } else {
+            Toast.makeText(context, "Camera permission is required to take a picture.", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun saveTempBitmapAndUpload(bitmap: Bitmap) {
-        val tempFile = File(requireContext().cacheDir, "temp_profile_image.jpg")
-        try {
-            FileOutputStream(tempFile).use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-            }
-            uploadImageToCloudinary(tempFile.absolutePath)
+    private fun saveTempBitmapAndGetUri(bitmap: Bitmap): Uri? {
+        return try {
+            val file = File(requireContext().cacheDir, "temp_crop_image.jpg")
+            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+            Uri.fromFile(file)
         } catch (e: Exception) {
-            Toast.makeText(context, "Failed to save image.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
+            null
         }
+    }
+
+
+    private fun captureImageFromCamera() {
+        if (requireContext().checkSelfPermission(android.Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED) {
+            launchCamera()
+        } else {
+            requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun launchCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        cameraLauncher.launch(intent)
     }
 
     private fun uploadImageToCloudinary(imagePathOrUri: Any) {

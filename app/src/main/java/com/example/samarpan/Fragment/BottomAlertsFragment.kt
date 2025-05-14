@@ -14,9 +14,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.samarpan.Adapter.AlertAdapter
 import com.example.samarpan.MainActivity
 import com.example.samarpan.Model.Alert
@@ -26,6 +30,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 
 class BottomAlertsFragment : BottomSheetDialogFragment() {
@@ -115,6 +121,71 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
         })
     }
 
+    private fun sendPushNotificationToRequester(alert: Alert, newStatus: String) {
+        val requesterId = alert.requesterId ?: return
+        val postTitle = alert.title ?: "your request"
+
+        val dynamicTitle = "Your request has been $newStatus"
+        val dynamicMessage = "Your request for: $postTitle was $newStatus by the donor."
+
+        val requesterTokenRef = FirebaseDatabase.getInstance().getReference("users")
+            .child(requesterId)
+            .child("fcmToken")
+
+        requesterTokenRef.get().addOnSuccessListener { snapshot ->
+            val receiverFcmToken = snapshot.getValue(String::class.java)
+            if (!receiverFcmToken.isNullOrEmpty()) {
+                lifecycleScope.launch {
+                    val accessToken = FirebaseAccessToken.getAccessToken(requireContext())
+                    accessToken?.let {
+                        sendPushNotification(it, receiverFcmToken, dynamicTitle, dynamicMessage)
+                    }
+                }
+            }
+        }
+    }
+
+
+    private fun sendPushNotification(
+        accessToken: String,
+        fcmToken: String,
+        title: String,
+        message: String
+    )
+    {
+        val context = requireContext()
+        val projectId = "samarpan-42c86" // 🔁 Replace with your actual project ID
+
+        val json = JSONObject()
+        val messageObj = JSONObject()
+        val notificationObj = JSONObject()
+
+        notificationObj.put("title", title)
+        notificationObj.put("body", message)
+
+        messageObj.put("token", fcmToken)
+        messageObj.put("notification", notificationObj)
+        json.put("message", messageObj)
+
+        val url = "https://fcm.googleapis.com/v1/projects/$projectId/messages:send"
+
+        val request = object : JsonObjectRequest(
+            Method.POST, url, json,
+            Response.Listener { response -> Log.d("FCM", "Push sent: $response") },
+            Response.ErrorListener { error -> Log.e("FCM", "Error: ${error.message}") }
+        ) {
+            override fun getHeaders(): Map<String, String> {
+                return mapOf(
+                    "Authorization" to "Bearer $accessToken",
+                    "Content-Type" to "application/json"
+                )
+            }
+        }
+
+        Volley.newRequestQueue(context).add(request)
+    }
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -139,8 +210,10 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
 
                     if (direction == ItemTouchHelper.RIGHT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Accepted")
+                        sendPushNotificationToRequester(alert, "Accepted")
                     } else if (direction == ItemTouchHelper.LEFT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Declined")
+                        sendPushNotificationToRequester(alert, "Declined")
                     }
                 } else if ((alert.status == "Accepted" || alert.status == "Declined") && alert.requesterId == currentUserId) {
                     viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -172,36 +245,42 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                 isCurrentlyActive: Boolean
             ) {
                 val itemView = viewHolder.itemView
-                val paint = Paint()
-                val textPaint = Paint().apply {
-                    color = Color.WHITE
-                    textSize = 40f
-                    isAntiAlias = true
-                    textAlign = Paint.Align.LEFT
-                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-                }
-
                 val alert = alertList[viewHolder.adapterPosition]
+                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-                if (alert.status == "Pending") {
-                    if (dX > 0) {
-                        // Swipe Right (Accept)
-                        paint.color = Color.parseColor("#43A047") // Green
-                        c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat(), paint)
+                // Clamp swipe distance
+                val swipeLimit = itemView.width / 3f
+                val clampedDx = dX.coerceIn(-swipeLimit, swipeLimit)
+
+                if (alert.status == "Pending" && alert.donorId == currentUserId) {
+                    // Donor swiping: show background and action text
+                    val paint = Paint().apply {
+                        color = if (clampedDx > 0) Color.parseColor("#43A047") else Color.parseColor("#E53935")
+                    }
+
+                    val textPaint = Paint().apply {
+                        color = Color.WHITE
+                        textSize = 40f
+                        isAntiAlias = true
+                        textAlign = Paint.Align.LEFT
+                        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                    }
+
+                    if (clampedDx > 0) {
+                        c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), clampedDx, itemView.bottom.toFloat(), paint)
                         c.drawText("Accept", itemView.left + 40f, itemView.top + itemView.height / 2f + 15f, textPaint)
-                    } else if (dX < 0) {
-                        // Swipe Left (Decline)
-                        paint.color = Color.parseColor("#E53935") // Red
-                        c.drawRect(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
+                    } else if (clampedDx < 0) {
+                        c.drawRect(itemView.right + clampedDx, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
                         c.drawText("Decline", itemView.right - 200f, itemView.top + itemView.height / 2f + 15f, textPaint)
                     }
                 }
 
-                // Clamp swipe distance for smoother transition
-                val swipeLimit = itemView.width / 3f
-                val clampedDx = dX.coerceIn(-swipeLimit, swipeLimit)
-                super.onChildDraw(c, recyclerView, viewHolder, clampedDx, dY, actionState, isCurrentlyActive)
+                // For non-donors or other statuses: no background, only slight movement
+                val finalDx = if (alert.donorId == currentUserId && alert.status == "Pending") clampedDx else dX * 0.1f
+
+                super.onChildDraw(c, recyclerView, viewHolder, finalDx, dY, actionState, isCurrentlyActive)
             }
+
         })
 
         itemTouchHelper.attachToRecyclerView(binding.alertRecyclerView)

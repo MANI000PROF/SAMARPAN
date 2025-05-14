@@ -145,7 +145,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/bg_input"
-            android:hint="Ask something..."
+            android:hint="Message..."
             android:textColorHint="#898888"
             android:inputType="text"
             android:minHeight="48dp"

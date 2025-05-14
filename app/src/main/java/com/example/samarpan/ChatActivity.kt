@@ -181,7 +181,7 @@ class ChatActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val fullName = snapshot.child("fullName").value?.toString() ?: "User"
                 val profileUrl = snapshot.child("profileImageUrl").value?.toString()
-                val isOnline = snapshot.child("online").getValue(Boolean::class.java) ?: false
+                val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
 
                 binding.userTitle.text = fullName
 
@@ -334,6 +334,7 @@ class ChatActivity : AppCompatActivity() {
         binding.replyText.text = message.message.ifEmpty { "Audio message" }
 
         binding.cancelReply.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             replyToMessage = null
             binding.replyLayout.visibility = View.GONE
         }

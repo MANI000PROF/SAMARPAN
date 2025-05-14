@@ -24,11 +24,15 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.net.HttpURLConnection
 import java.net.URL
+import android.os.Handler
+import android.os.Looper
 
 class FullScreenMapActivity : AppCompatActivity() {
 
     private lateinit var mapView: MapView
     private var loadingDialog: AlertDialog? = null
+    private val timeoutHandler = Handler(Looper.getMainLooper())
+    private val TIMEOUT_MILLIS = 8000L // 8 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -151,10 +155,24 @@ class FullScreenMapActivity : AppCompatActivity() {
 
     private fun drawRoute(start: GeoPoint, end: GeoPoint) {
         showLoadingDialog()
+
+        // Timeout fallback to prevent stuck loader
+        timeoutHandler.postDelayed({
+            if (loadingDialog?.isShowing == true) {
+                hideLoadingDialog()
+                Toast.makeText(this, "Route loading timed out.", Toast.LENGTH_SHORT).show()
+                finish() // Close the activity to prevent user being stuck
+            }
+        }, TIMEOUT_MILLIS)
+
         if (start.latitude == 0.0 || start.longitude == 0.0 || end.latitude == 0.0 || end.longitude == 0.0) {
             Toast.makeText(this, "Invalid coordinates for routing.", Toast.LENGTH_SHORT).show()
+            hideLoadingDialog()
+            timeoutHandler.removeCallbacksAndMessages(null) // cancel timeout
+            finish() // finish if invalid input
             return
         }
+
         val url = "https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248c120dbeecf954883b4f3e262894a07c1&start=${start.longitude},${start.latitude}&end=${end.longitude},${end.latitude}"
 
         Thread {
@@ -188,12 +206,15 @@ class FullScreenMapActivity : AppCompatActivity() {
 
                     mapView.zoomToBoundingBox(BoundingBox.fromGeoPoints(roadPoints), true)
                     mapView.invalidate()
+
                     hideLoadingDialog()
+                    timeoutHandler.removeCallbacksAndMessages(null) // cancel timeout
                 }
             } catch (e: Exception) {
                 Log.e("RouteError", "Failed to get route", e)
                 runOnUiThread {
                     hideLoadingDialog()
+                    timeoutHandler.removeCallbacksAndMessages(null)
                     Toast.makeText(this@FullScreenMapActivity, "No route found!", Toast.LENGTH_SHORT).show()
                     showRetryDialog(start, end)
                 }

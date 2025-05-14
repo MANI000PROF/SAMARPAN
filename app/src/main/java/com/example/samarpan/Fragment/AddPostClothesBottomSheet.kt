@@ -34,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -56,6 +57,8 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
     private var cloudinaryImageUrl: String? = null
     private lateinit var database: DatabaseReference
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    private val UCROP_REQUEST_CODE = 69
+    private val UCROP_ERROR_CODE = 96
 
     companion object {
         private const val LOCATION_PICKER_REQUEST = 1001
@@ -157,12 +160,45 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             val bitmap = data?.extras?.get("data") as? Bitmap
             if (bitmap != null) {
-                Log.d("CameraDebug", "Captured image successfully")
-                analyzeImageWithMLKit(bitmap)
+                val uri = saveBitmapToCache(bitmap)
+                uri?.let { startCrop(it) }
             } else {
-                Log.e("CameraDebug", "Failed to capture image. Bitmap is null")
                 Toast.makeText(context, "Failed to capture image", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        if (requestCode == UCROP_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val resultUri = UCrop.getOutput(data!!)
+            resultUri?.let {
+                val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, it)
+                postImage.setImageBitmap(bitmap)
+                analyzeImageWithMLKit(bitmap)
+            }
+        } else if (requestCode == UCROP_ERROR_CODE) {
+            val cropError = UCrop.getError(data!!)
+            Toast.makeText(context, "Crop error: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun startCrop(sourceUri: Uri) {
+        val destinationUri = Uri.fromFile(File(requireContext().cacheDir, "cropped_image.jpg"))
+        UCrop.of(sourceUri, destinationUri)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(800, 800)
+            .start(requireContext(), this, UCROP_REQUEST_CODE)
+    }
+
+    private fun saveBitmapToCache(bitmap: Bitmap): Uri? {
+        return try {
+            val file = File(requireContext().cacheDir, "temp_image.jpg")
+            val fos = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+            file.toUri()
+        } catch (e: Exception) {
+            Log.e("BitmapSave", "Failed to save bitmap: ${e.message}")
+            null
         }
     }
 

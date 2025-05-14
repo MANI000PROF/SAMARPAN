@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.animation.AnimationUtils
+import androidx.navigation.navOptions
 import com.airbnb.lottie.LottieAnimationView
 import com.example.samarpan.Fragment.ChatFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -172,14 +173,28 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             // Haptic feedback on click
+            val options = navOptions {
+                launchSingleTop = true
+                popUpTo(R.id.homeFragment2) { inclusive = false }
+            }
             bottomNav.findViewById<View>(item.itemId)?.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
             when (item.itemId) {
-                R.id.homeFragment2 -> navController.navigate(R.id.homeFragment2)
-                R.id.historyFragment2 -> navController.navigate(R.id.historyFragment2)
-                R.id.leaderBoardFragment2 -> navController.navigate(R.id.leaderBoardFragment2)
-                R.id.searchFragment2 -> navController.navigate(R.id.searchFragment2)
-                R.id.profileFragment2 -> navController.navigate(R.id.profileFragment2)
+                R.id.homeFragment2 -> if (navController.currentDestination?.id != R.id.homeFragment2) {
+                    navController.navigate(R.id.homeFragment2, null, options)
+                }
+                R.id.historyFragment2 -> if (navController.currentDestination?.id != R.id.historyFragment2) {
+                    navController.navigate(R.id.historyFragment2, null, options)
+                }
+                R.id.leaderBoardFragment2 -> if (navController.currentDestination?.id != R.id.leaderBoardFragment2) {
+                    navController.navigate(R.id.leaderBoardFragment2, null, options)
+                }
+                R.id.searchFragment2 -> if (navController.currentDestination?.id != R.id.searchFragment2) {
+                    navController.navigate(R.id.searchFragment2, null, options)
+                }
+                R.id.profileFragment2 -> if (navController.currentDestination?.id != R.id.profileFragment2) {
+                    navController.navigate(R.id.profileFragment2, null, options)
+                }
             }
             true
         }
@@ -201,21 +216,21 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.foodBtn).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            navController.navigate(R.id.homeFragment2)
+            navigateToIfNotCurrent(R.id.homeFragment2)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragment2)
         }
 
         findViewById<View>(R.id.clothesBtn).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            navController.navigate(R.id.homeFragmentClothes)
+            navigateToIfNotCurrent(R.id.homeFragmentClothes)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragmentClothes)
         }
 
         findViewById<View>(R.id.electronicsBtn).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            navController.navigate(R.id.homeFragmentElectronics)
+            navigateToIfNotCurrent(R.id.homeFragmentElectronics)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragmentElectronics)
         }
@@ -311,7 +326,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun onSwipeLeft() {
         val current = navController.currentDestination?.id
-        val options = androidx.navigation.navOptions {
+        val options = navOptions {
+            launchSingleTop = true
+            popUpTo(R.id.homeFragment2) { inclusive = false } // Update popUpTo as needed
             anim {
                 enter = R.anim.slide_in_right
                 exit = R.anim.slide_out_left
@@ -322,11 +339,15 @@ class MainActivity : AppCompatActivity() {
 
         when (current) {
             R.id.homeFragment2 -> {
-                navController.navigate(R.id.homeFragmentClothes, null, options)
+                if (current != R.id.homeFragmentClothes) {
+                    navController.navigate(R.id.homeFragmentClothes, null, options)
+                }
                 highlightCategory(R.id.homeFragmentClothes)
             }
             R.id.homeFragmentClothes -> {
-                navController.navigate(R.id.homeFragmentElectronics, null, options)
+                if (navController.currentDestination?.id != R.id.homeFragmentElectronics) {
+                    navController.navigate(R.id.homeFragmentElectronics, null, options)
+                }
                 highlightCategory(R.id.homeFragmentElectronics)
             }
         }
@@ -334,7 +355,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun onSwipeRight() {
         val current = navController.currentDestination?.id
-        val options = androidx.navigation.navOptions {
+        val options = navOptions {
+            launchSingleTop = true
             anim {
                 enter = R.anim.slide_in_left
                 exit = R.anim.slide_out_right
@@ -345,14 +367,27 @@ class MainActivity : AppCompatActivity() {
 
         when (current) {
             R.id.homeFragmentElectronics -> {
-                navController.navigate(R.id.homeFragmentClothes, null, options)
+                if (current != R.id.homeFragmentClothes) {
+                    navController.navigate(R.id.homeFragmentClothes, null, options)
+                }
                 highlightCategory(R.id.homeFragmentClothes)
             }
             R.id.homeFragmentClothes -> {
-                navController.navigate(R.id.homeFragment2, null, options)
+                if (current != R.id.homeFragment2) {
+                    navController.navigate(R.id.homeFragment2, null, options)
+                }
                 highlightCategory(R.id.homeFragment2)
             }
         }
     }
 
+    private fun navigateToIfNotCurrent(destinationId: Int) {
+        if (navController.currentDestination?.id != destinationId) {
+            val options = navOptions {
+                launchSingleTop = true
+                popUpTo(R.id.homeFragment2) { inclusive = false } // Update popUpTo as needed
+            }
+            navController.navigate(destinationId, null, options)
+        }
+    }
 }

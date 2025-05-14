@@ -71,5 +71,14 @@
     <action
         android:id="@+id/action_homeFragment2_to_postElectronicsInfoFragment"
         app:destination="@id/postElectronicsInfoFragment" />
+    <action
+        android:id="@+id/action_searchFragment2_to_postInfoFragment"
+        app:destination="@id/postInfoFragment" />
+    <action
+        android:id="@+id/action_searchFragment2_to_postClothesInfoFragment"
+        app:destination="@id/postClothesInfoFragment" />
+    <action
+        android:id="@+id/action_searchFragment2_to_postElectronicsInfoFragment"
+        app:destination="@id/postElectronicsInfoFragment" />
 
 </navigation>
