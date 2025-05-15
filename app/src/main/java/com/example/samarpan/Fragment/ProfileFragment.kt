@@ -1,12 +1,16 @@
 package com.example.samarpan.Fragment
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,12 +19,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.UploadCallback
 import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
+import com.example.samarpan.FullScreenImageActivity
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
 import com.example.samarpan.SettingsActivity
@@ -51,10 +57,18 @@ class ProfileFragment : Fragment() {
     private lateinit var editProfileBtn: MaterialButton
     private lateinit var historyBtn: MaterialButton
     private lateinit var myConnectionsBtn: MaterialButton
+    private lateinit var nestedScrollView: NestedScrollView
 
     private val auth = FirebaseAuth.getInstance()
     private val dbRef = FirebaseDatabase.getInstance().reference
+    private var startY = 0f
+    private var cropTriggered = false
+    private var currentProfileScale = 1f
+    private var lastCropTime = 0L
+    private val cropCooldown = 800 // milliseconds
 
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,7 +96,13 @@ class ProfileFragment : Fragment() {
 
         profileImage.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            triggerCropForProfileImage()
+        }
+
+        profileImage.setOnLongClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             showImagePickerDialog()
+            true
         }
 
         myDonationsBtn.setOnClickListener{
@@ -103,12 +123,12 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             val percentage = abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
             val scale = 1 - (percentage * 0.6f)
             val minScale = 0.4f
             val adjustedScale = if (scale < minScale) minScale else scale
+            currentProfileScale = scale.coerceAtLeast(0.4f)
             profileImageCard.scaleX = adjustedScale
             profileImageCard.scaleY = adjustedScale
 
@@ -118,7 +138,39 @@ class ProfileFragment : Fragment() {
             profileImageCard.translationY = -percentage * minTranslationY
         })
 
+
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cropTriggered = false
+    }
+
+    private fun triggerCropForProfileImage() {
+        val photoUrl = auth.currentUser?.photoUrl?.toString()
+        if (!photoUrl.isNullOrEmpty()) {
+            downloadImageToCacheAndStartCrop(photoUrl)
+        } else {
+            Toast.makeText(requireContext(), "No profile image to crop.", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun downloadImageToCacheAndStartCrop(imageUrl: String) {
+        Thread {
+            try {
+                val input = java.net.URL(imageUrl).openStream()
+                val file = requireContext().cacheDir.resolve("cached_profile_image.jpg")
+                file.outputStream().use { input.copyTo(it) }
+
+                Handler(Looper.getMainLooper()).post {
+                    startCrop(Uri.fromFile(file))
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(requireContext(), "Failed to load image for cropping", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
     private fun initCloudinary() {

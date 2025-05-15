@@ -1,5 +1,6 @@
 package com.example.samarpan
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.graphics.Canvas
@@ -9,6 +10,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -54,6 +57,11 @@ class ChatActivity : AppCompatActivity() {
     private var isRecording = false
     private val timestampVisibilityMap = mutableMapOf<String, Boolean>()
     private var replyToMessage: ChatMessage? = null
+    private var recordingDialog: AlertDialog? = null
+    private var initialX = 0f
+    private var isCancelled = false
+    private lateinit var recordingView: View
+    private var waveformRunnable: Runnable? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +98,7 @@ class ChatActivity : AppCompatActivity() {
         binding.micButton.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (isRecording) {
-                stopRecording()
+                stopRecording(send = true)
             } else {
                 startRecording()
             }
@@ -115,8 +123,7 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
-        val outputDir = cacheDir
-        val outputFile = File.createTempFile("audio_", ".3gp", outputDir)
+        val outputFile = File.createTempFile("audio_", ".3gp", cacheDir)
         audioFilePath = outputFile.absolutePath
 
         mediaRecorder = MediaRecorder().apply {
@@ -124,34 +131,155 @@ class ChatActivity : AppCompatActivity() {
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
             setOutputFile(audioFilePath)
+        }
 
-            try {
-                prepare()
-                start()
-                isRecording = true
-                Toast.makeText(this@ChatActivity, "Recording started...", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Recording failed", Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
-            }
+        try {
+            mediaRecorder?.prepare()
+            mediaRecorder?.start()
+            isRecording = true
+            isCancelled = false
+
+            showRecordingDialog()
+            binding.micButton.setImageResource(R.drawable.ic_record)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Recording failed", Toast.LENGTH_SHORT).show()
+            mediaRecorder?.release()
+            mediaRecorder = null
         }
     }
 
-    private fun stopRecording() {
+    private fun stopRecording(send: Boolean) {
+        if (!isRecording) return
+
         try {
             mediaRecorder?.apply {
                 stop()
                 release()
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
             mediaRecorder = null
             isRecording = false
-            Toast.makeText(this, "Recording saved!", Toast.LENGTH_SHORT).show()
+            stopWaveformUpdates()
+            runOnUiThread {
+                binding.micButton.setImageResource(R.drawable.ic_mic)
+                dismissRecordingDialog()
 
-            sendAudioMessage(audioFilePath)
+                if (send && !isCancelled && !audioFilePath.isNullOrEmpty()) {
+                    sendAudioMessage(audioFilePath!!)
+                    Toast.makeText(this, "Recording sent!", Toast.LENGTH_SHORT).show()
+                } else {
+                    deleteAudioFileIfExists()
+                    Toast.makeText(this, "Recording cancelled", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun showRecordingDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_recording, null)
+        val micAnimation = dialogView.findViewById<LottieAnimationView>(R.id.micAnimation)
+        val waveformView = dialogView.findViewById<WaveformView>(R.id.waveformView)
+
+        recordingDialog = AlertDialog.Builder(this, R.style.TransparentDialog)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        recordingDialog?.show()
+        micAnimation.playAnimation()
+        startWaveformUpdates(waveformView)
+
+        enableSwipeToCancel(dialogView)
+
+        // 🔥 Tap dialog to stop and send recording
+        dialogView.setOnClickListener {
+            stopRecording(send = true)
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun enableSwipeToCancel(dialogView: View) {
+        dialogView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = event.x
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = event.x - initialX
+                    if (deltaX < -150) { // left swipe
+                        if (isRecording) {
+                            cancelRecording()
+                        }
+                        return@setOnTouchListener true
+                    }
+                }
+            }
+            false
+        }
+    }
+
+    private fun cancelRecording() {
+        stopWaveformUpdates()
+        try {
+            mediaRecorder?.apply {
+                try {
+                    stop()
+                } catch (e: IllegalStateException) {
+                    // Already stopped or not recording
+                }
+                release()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        mediaRecorder = null
+        isRecording = false
+        isCancelled = true
+        binding.micButton.setImageResource(R.drawable.ic_mic)
+        dismissRecordingDialog()
+        Toast.makeText(this, "Recording cancelled", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun startWaveformUpdates(waveformView: WaveformView) {
+        waveformRunnable = object : Runnable {
+            override fun run() {
+                if (isRecording) {
+                    val amplitude = mediaRecorder?.maxAmplitude ?: 0
+                    waveformView.addAmplitude(amplitude)
+                    waveformView.invalidate()
+                    waveformView.postDelayed(this, 100)
+                }
+            }
+        }
+        waveformRunnable?.run()
+    }
+
+    private fun stopWaveformUpdates() {
+        waveformRunnable = null
+    }
+
+    private fun dismissRecordingDialog() {
+        recordingDialog?.dismiss()
+        recordingDialog = null
+    }
+
+    private fun deleteAudioFileIfExists() {
+        audioFilePath?.let {
+            val file = File(it)
+            if (file.exists()) file.delete()
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        val typingRef = databaseRef.child("chats").child(chatId).child("typing").child(senderId)
+        typingRef.setValue(false)
     }
 
     private fun sendAudioMessage(audioPath: String) {

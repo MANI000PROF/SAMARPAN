@@ -51,7 +51,8 @@
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/button_shape"
                     android:src="@drawable/post"
-                    android:contentDescription="@string/app_name" />
+                    android:contentDescription="@string/app_name"
+                    app:tint="?attr/colorOnSurface" />
 
                 <EditText
                     android:id="@+id/locationEditText"
