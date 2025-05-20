@@ -42,6 +42,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
     private lateinit var alertAdapter: AlertAdapter
     private lateinit var alertList: MutableList<Alert>
     private lateinit var database: DatabaseReference
+    private lateinit var valueEventListener: ValueEventListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +54,38 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
         alertAdapter = AlertAdapter(alertList)
         binding.alertRecyclerView.adapter = alertAdapter
         binding.alertRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.clearBtn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+            val databaseRef = FirebaseDatabase.getInstance().getReference("Requests")
+
+            databaseRef.get().addOnSuccessListener { snapshot ->
+                val batchDelete = mutableListOf<DatabaseReference>()
+
+                for (requestSnapshot in snapshot.children) {
+                    val alert = requestSnapshot.getValue(Alert::class.java)
+                    if (alert != null && (alert.donorId == currentUserId || alert.requesterId == currentUserId)) {
+                        batchDelete.add(requestSnapshot.ref)
+                    }
+                }
+
+                for (ref in batchDelete) {
+                    ref.removeValue()
+                }
+
+                val size = alertList.size
+                alertList.clear()
+                alertAdapter.notifyItemRangeRemoved(0, size)
+                binding.root.post {
+                    binding.noAlertsAnimation.visibility = View.VISIBLE
+                    binding.noAlertsTextView.visibility = View.VISIBLE
+                    binding.alertRecyclerView.visibility = View.GONE
+                    binding.clearBtn.visibility = View.GONE
+                }
+                Toast.makeText(requireContext(), "Alerts cleared", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         fetchUserAlerts()
         enableSwipeGestures()
@@ -77,7 +110,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         database = FirebaseDatabase.getInstance().getReference("Requests")
 
-        database.addValueEventListener(object : ValueEventListener {
+        valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Check if binding is not null before using it
                 if (_binding == null) return
@@ -105,11 +138,14 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                     binding.noAlertsAnimation.visibility = View.VISIBLE
                     binding.noAlertsTextView.visibility = View.VISIBLE
                     binding.alertRecyclerView.visibility = View.GONE
+                    binding.clearBtn.visibility = View.GONE  // 🔴 Hide clear button when no alerts
                 } else {
                     binding.noAlertsAnimation.visibility = View.GONE
                     binding.noAlertsTextView.visibility = View.GONE
                     binding.alertRecyclerView.visibility = View.VISIBLE
+                    binding.clearBtn.visibility = View.VISIBLE  // ✅ Show clear button when alerts are present
                 }
+
                 (activity as? MainActivity)?.updateAlertAnimation(alertList.isNotEmpty())
 
                 alertAdapter.notifyDataSetChanged()
@@ -118,7 +154,8 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
             override fun onCancelled(error: DatabaseError) {
                 // Optionally handle error
             }
-        })
+        }
+        database.addValueEventListener(valueEventListener)
     }
 
     private fun sendPushNotificationToRequester(alert: Alert, newStatus: String) {
@@ -189,6 +226,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        database.removeEventListener(valueEventListener)
     }
 
     private fun enableSwipeGestures() {
@@ -204,7 +242,7 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val alert = alertList[position]
-
+                if (position >= alertList.size) return
                 if (alert.status == "Pending" && alert.donorId == currentUserId) {
                     viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
 

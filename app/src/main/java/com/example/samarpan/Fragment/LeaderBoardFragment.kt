@@ -18,7 +18,7 @@ class LeaderBoardFragment : Fragment() {
 
     private var _binding: FragmentLeaderBoardBinding? = null
     private val binding get() = _binding!!
-
+    private var userValueEventListener: ValueEventListener? = null
     private lateinit var leaderBoardAdapter: LeaderBoardAdapter
     private val leaderBoardList = mutableListOf<LeaderBoardDonor>()
 
@@ -91,7 +91,7 @@ class LeaderBoardFragment : Fragment() {
         fun finalizeLeaderBoard() {
             val userRef = FirebaseDatabase.getInstance().getReference("users")
 
-            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            userValueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for ((donorId, donor) in leaderBoardMap) {
                         val profileImageUrl = snapshot.child(donorId).child("profileImageUrl").getValue(String::class.java)
@@ -106,13 +106,16 @@ class LeaderBoardFragment : Fragment() {
                     // Cache updated data
                     leaderBoardRef.setValue(leaderBoardList)
 
-                    updateUI()
+                    if (isAdded && context != null) {
+                        updateUI()
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     updateUI()
                 }
-            })
+            }
+            userRef.addListenerForSingleValueEvent(userValueEventListener!!)
         }
 
         fun onDataFetched() {
@@ -146,12 +149,14 @@ class LeaderBoardFragment : Fragment() {
 
 
     private fun updateUI() {
-        leaderBoardAdapter.notifyDataSetChanged()
+        if (!isAdded || _binding == null || context == null) return // <- SAFETY CHECK FIRST
 
+        val ctx = requireContext()
+        leaderBoardAdapter.notifyDataSetChanged()
         if (leaderBoardList.isNotEmpty()) {
             val topDonor = leaderBoardList.first()
             if (topDonor.profileImage?.isNotEmpty() == true) {
-                Glide.with(requireContext())
+                Glide.with(ctx)
                     .load(topDonor.profileImage)
                     .placeholder(R.drawable.profile_placeholder)
                     .circleCrop()
@@ -180,7 +185,10 @@ class LeaderBoardFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        userValueEventListener?.let {
+            FirebaseDatabase.getInstance().getReference("users").removeEventListener(it)
+        }
         _binding = null
+        super.onDestroyView()
     }
 }

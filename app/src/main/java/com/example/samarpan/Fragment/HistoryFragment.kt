@@ -32,12 +32,8 @@ class HistoryFragment : Fragment() {
 
     private lateinit var historyAdapter: HistoryAdapter
     private val postList = mutableListOf<UnifiedPost>()
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    private var currentUserId: String? = ""
     private val cacheKey = "cachedHistoryPosts"
-
-    private lateinit var editIcon: Bitmap
-    private lateinit var deleteIcon: Bitmap
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,11 +58,12 @@ class HistoryFragment : Fragment() {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
-
-        if (currentUserId == null) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
             showNoPosts()
             return
         }
+        currentUserId = currentUser.uid
 
         if (isInternetAvailable()) {
             loadUserPosts()
@@ -195,6 +192,7 @@ class HistoryFragment : Fragment() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
+                if (position == RecyclerView.NO_POSITION || position >= postList.size) return
                 val post = postList[position]  // Replace with your actual list of posts
                 viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 // Handle swipe actions
@@ -214,18 +212,26 @@ class HistoryFragment : Fragment() {
                 } else if (direction == ItemTouchHelper.LEFT) {
                     // Swipe Left -> Delete Post
                     post.postId?.let {
-                        FirebaseDatabase.getInstance().getReference("DonationPosts").child(it)
-                            .removeValue()
-                            .addOnSuccessListener {
-                                postList.removeAt(position)
-                                historyAdapter.notifyItemRemoved(position)
-                                Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show()
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(context, "Failed to delete post", Toast.LENGTH_SHORT)
-                                    .show()
-                                historyAdapter.notifyItemChanged(position)
-                            }
+                        val categoryRef = when (post.category) {
+                            "Food" -> "DonationPosts"
+                            "Clothes" -> "DonationPostsClothes"
+                            "Electronics" -> "DonationPostsElectronics"
+                            else -> null
+                        }
+
+                        if (categoryRef != null) {
+                            FirebaseDatabase.getInstance().getReference(categoryRef).child(post.postId!!)
+                                .removeValue()
+                                .addOnSuccessListener {
+                                    postList.removeAt(position)
+                                    historyAdapter.notifyItemRemoved(position)
+                                    Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(context, "Failed to delete post", Toast.LENGTH_SHORT).show()
+                                    historyAdapter.notifyItemChanged(position)
+                                }
+                        }
                     }
                 }
             }
@@ -301,8 +307,8 @@ class HistoryFragment : Fragment() {
     }
 
     private fun isInternetAvailable(): Boolean {
-        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return cm.activeNetworkInfo?.isConnectedOrConnecting == true
+        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        return cm?.activeNetworkInfo?.isConnectedOrConnecting == true
     }
 
     private fun saveToCache(posts: List<UnifiedPost>) {

@@ -8,11 +8,15 @@ import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -21,6 +25,7 @@ import com.denzcoskun.imageslider.constants.ScaleTypes
 import com.denzcoskun.imageslider.models.SlideModel
 import com.example.samarpan.Adapter.PostAdapter
 import com.example.samarpan.Adapter.PostClothesAdapter
+import com.example.samarpan.Fragment.HomeFragment.FilterMode
 import com.example.samarpan.MainActivity
 import com.example.samarpan.Model.DonationPostsClothes
 import com.example.samarpan.R
@@ -44,6 +49,11 @@ class HomeFragmentClothes : Fragment() {
     private var userLocation: Location? = null
 
     private val sharedPrefsKey = "cached_clothes_posts"
+    private var currentFilterMode: FilterMode = FilterMode.LOCATION
+
+    enum class FilterMode {
+        LOCATION, CLOTHES_NAME, PERSON_NAME, DATE_TIME
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,29 +63,91 @@ class HomeFragmentClothes : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupImageSlider()
         setupRecyclerView()
-
+        binding.imageSlider.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                }
+            }
+            false
+        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         getUserLocation()
 
         setupSwipeToRefresh()
         loadData()
 
-        binding.filterBtn.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            val location = binding.locationEditText.text.toString().trim()
-            if (location.isEmpty()) {
-                postClothesAdapter.updatePostList(fullPostList, userLocation)
-            } else {
-                val filtered = fullPostList.filter {
-                    it.location?.contains(location, ignoreCase = true) ?: false
+        binding.locationEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString().trim()
+                if (query.isEmpty()) {
+                    postClothesAdapter.updatePostList(fullPostList, userLocation)
+                } else {
+                    val filtered = fullPostList.filter { post ->
+                        when (currentFilterMode) {
+                            FilterMode.LOCATION -> post.location?.contains(query, true) == true
+                            FilterMode.CLOTHES_NAME -> post.clothesTitle?.contains(
+                                query,
+                                true
+                            ) == true
+
+                            FilterMode.PERSON_NAME -> post.profileName?.contains(
+                                query,
+                                true
+                            ) == true
+
+                            FilterMode.DATE_TIME -> {
+                                val formattedTime = formatTimestamp(post.timestamp)
+                                formattedTime.contains(query, ignoreCase = true)
+                            }
+                        }
+                    }
+                    postClothesAdapter.updatePostList(filtered, userLocation)
                 }
-                postClothesAdapter.updatePostList(filtered, userLocation)
             }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        binding.filterBtn.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val popupMenu = PopupMenu(requireContext(), view)
+            popupMenu.menu.apply {
+                add("Location")
+                add("Clothes Name")
+                add("Person Name")
+                add("Date/Time")
+            }
+
+            popupMenu.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.title.toString()) {
+                    "Location" -> {
+                        currentFilterMode = FilterMode.LOCATION
+                        binding.locationEditText.hint = "Enter location"
+                    }
+                    "Clothes Name" -> {
+                        currentFilterMode = FilterMode.CLOTHES_NAME
+                        binding.locationEditText.hint = "Enter clothes name"
+                    }
+                    "Person Name" -> {
+                        currentFilterMode = FilterMode.PERSON_NAME
+                        binding.locationEditText.hint = "Enter person name"
+                    }
+                    "Date/Time" -> {
+                        currentFilterMode = FilterMode.DATE_TIME
+                        binding.locationEditText.hint = "Enter date/time"
+                    }
+                }
+                true
+            }
+            popupMenu.show()
         }
 
         binding.addPostBtn.setOnClickListener {
@@ -89,7 +161,10 @@ class HomeFragmentClothes : Fragment() {
             (activity as? MainActivity)?.setCategoryIconsVisibility(showIcons)
         }
     }
-
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("dd MMM yyyy • hh:mm a", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date(timestamp))
+    }
     override fun onResume() {
         super.onResume()
         loadData()

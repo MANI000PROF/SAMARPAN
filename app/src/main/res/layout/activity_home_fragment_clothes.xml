@@ -45,15 +45,17 @@
                 android:gravity="center_vertical"
                 android:layout_marginBottom="8dp">
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/addPostBtn"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="8dp"
-                    android:background="@drawable/button_shape_1"
-                    android:src="@drawable/post"
-                    android:contentDescription="@string/app_name"
-                    android:tint="?attr/colorOnSurface"/>
+                    android:contentDescription="Add Post"
+                    app:icon="@drawable/post"
+                    app:iconTint="?attr/colorOnSurface"
+                    app:rippleColor="#BA918C"
+                    app:strokeColor="#BA918C"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
                 <EditText
                     android:id="@+id/locationEditText"
@@ -66,14 +68,18 @@
                     android:minHeight="48dp"
                     android:inputType="text" />
 
-                <androidx.appcompat.widget.AppCompatButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/filterBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/button_shape_1"
-                    android:text="@string/filter"
-                    android:textAllCaps="false" />
+                    app:icon="@drawable/ic_filter_list"
+                    android:contentDescription="Filter"
+                    app:tint="?attr/colorOnSurface"
+                    app:iconTint="?attr/colorOnSurface"
+                    app:rippleColor="#BA918C"
+                    app:strokeColor="#BA918C"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
             </LinearLayout>
 
             <!-- RecyclerView -->

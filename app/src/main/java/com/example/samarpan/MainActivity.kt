@@ -3,9 +3,6 @@ package com.example.samarpan
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -19,10 +16,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
-import android.view.animation.AnimationUtils
 import androidx.navigation.navOptions
-import com.airbnb.lottie.LottieAnimationView
-import com.example.samarpan.Fragment.ChatFragment
+import com.example.samarpan.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -33,13 +28,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private val NOTIFICATION_PERMISSION_CODE = 1001
     private lateinit var gestureDetector: GestureDetector
-
+    private lateinit var binding: ActivityMainBinding
     private val TAG = "SwipeGesture"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -85,14 +81,14 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-        val appName = findViewById<TextView>(R.id.textView4)
+        val appName = binding.textView4
         appName.alpha = 0f
         appName.translationY = -30f
         appName.animate().alpha(1f).translationY(0f).setDuration(600).setStartDelay(150).start()
 
-        val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons)
-        val menuBtn = findViewById<LottieAnimationView>(R.id.menuBtn)
-        val alertBtn = findViewById<LottieAnimationView>(R.id.alertBtn)
+        val iconsLayout = binding.categoryIcons
+        val menuBtn = binding.menuBtn
+        val alertBtn = binding.alertBtn
 
         iconsLayout.alpha = 0f
         iconsLayout.translationY = 50f
@@ -151,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Control visibility of chat button based on the fragment
-            val chatBtn = findViewById<View>(R.id.chatBtn)
+            val chatBtn = binding.chatBtn
             if (showChatButton) {
                 if (chatBtn.visibility != View.VISIBLE) {
                     chatBtn.visibility = View.VISIBLE
@@ -163,21 +159,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-
-        val bottomNav: BottomNavigationView = findViewById(R.id.bottomNavigationView)
+        val bottomNav: BottomNavigationView = binding.bottomNavigationView
         bottomNav.translationY = 300f
         bottomNav.alpha = 0f
         bottomNav.animate().translationY(0f).alpha(1f).setDuration(500).start()
         bottomNav.setupWithNavController(navController)
 
         bottomNav.setOnItemSelectedListener { item ->
-            // Haptic feedback on click
+
+            val menuView = binding.bottomNavigationView.getChildAt(0) as ViewGroup
+            val itemView = menuView.getChildAt(menuIndexForItem(item.itemId))
+
+            val iconView = (itemView as ViewGroup).getChildAt(0)
+
+            iconView.animate()
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(150)
+                .withEndAction {
+                    iconView.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(150)
+                        .start()
+                }
+                .start()
+
             val options = navOptions {
                 launchSingleTop = true
                 popUpTo(R.id.homeFragment2) { inclusive = false }
             }
-            bottomNav.findViewById<View>(item.itemId)?.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
             when (item.itemId) {
                 R.id.homeFragment2 -> if (navController.currentDestination?.id != R.id.homeFragment2) {
@@ -185,9 +196,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.historyFragment2 -> if (navController.currentDestination?.id != R.id.historyFragment2) {
                     navController.navigate(R.id.historyFragment2, null, options)
-                }
-                R.id.leaderBoardFragment2 -> if (navController.currentDestination?.id != R.id.leaderBoardFragment2) {
-                    navController.navigate(R.id.leaderBoardFragment2, null, options)
                 }
                 R.id.searchFragment2 -> if (navController.currentDestination?.id != R.id.searchFragment2) {
                     navController.navigate(R.id.searchFragment2, null, options)
@@ -199,7 +207,18 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        findViewById<View>(R.id.chatBtn).setOnClickListener {
+
+        binding.fabLeaderboardIcon.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            val options = navOptions {
+                launchSingleTop = true
+                popUpTo(R.id.homeFragment2) { inclusive = false }
+            }
+            navController.navigate(R.id.leaderBoardFragment2, null, options)
+            binding.bottomNavigationView.selectedItemId = R.id.leaderBoardFragment2
+        }
+
+        binding.chatBtn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             navController.navigate(R.id.chatFragment2)
         }
@@ -214,28 +233,37 @@ class MainActivity : AppCompatActivity() {
             MenuFragment().show(supportFragmentManager, "MenuFragment")
         }
 
-        findViewById<View>(R.id.foodBtn).setOnClickListener {
+        binding.foodBtn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             navigateToIfNotCurrent(R.id.homeFragment2)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragment2)
         }
 
-        findViewById<View>(R.id.clothesBtn).setOnClickListener {
+        binding.clothesBtn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             navigateToIfNotCurrent(R.id.homeFragmentClothes)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragmentClothes)
         }
 
-        findViewById<View>(R.id.electronicsBtn).setOnClickListener {
+        binding.electronicsBtn.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             navigateToIfNotCurrent(R.id.homeFragmentElectronics)
             bottomNav.menu.findItem(R.id.homeFragment2).isChecked = true
             highlightCategory(R.id.homeFragmentElectronics)
         }
     }
-
+    private fun menuIndexForItem(itemId: Int): Int {
+        return when(itemId) {
+            R.id.homeFragment2 -> 0
+            R.id.historyFragment2 -> 1
+            R.id.leaderBoardFragment2 -> 2
+            R.id.searchFragment2 -> 3
+            R.id.profileFragment2 -> 4
+            else -> 0
+        }
+    }
     override fun onResume() {
         super.onResume()
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -257,7 +285,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setCategoryIconsVisibility(show: Boolean) {
-        val iconsLayout = findViewById<LinearLayout>(R.id.categoryIcons) ?: return
+        val iconsLayout = binding.categoryIcons ?: return
 
         Log.d("CategoryIcons", "setCategoryIconsVisibility called with show = $show")
 
@@ -280,7 +308,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun updateAlertAnimation(hasAlerts: Boolean) {
-        val alertBtn = findViewById<LottieAnimationView>(R.id.alertBtn)
+        val alertBtn = binding.alertBtn
         if (hasAlerts) {
             alertBtn.loop(true)
             alertBtn.playAnimation()
@@ -312,9 +340,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun highlightCategory(active: Int) {
-        val foodBtn = findViewById<ImageView>(R.id.foodBtn)
-        val clothesBtn = findViewById<ImageView>(R.id.clothesBtn)
-        val electronicsBtn = findViewById<ImageView>(R.id.electronicsBtn)
+        val foodBtn = binding.foodBtn
+        val clothesBtn = binding.clothesBtn
+        val electronicsBtn = binding.electronicsBtn
 
         val activeColor = ContextCompat.getColor(this, R.color.teal_700)
         val defaultColor = ContextCompat.getColor(this, R.color.colorPrimary)
@@ -336,7 +364,10 @@ class MainActivity : AppCompatActivity() {
                 popExit = R.anim.slide_out_right
             }
         }
-
+        if (current == R.id.homeFragmentElectronics) {
+            // maybe show a toast or visual feedback it's the last category
+            return
+        }
         when (current) {
             R.id.homeFragment2 -> {
                 if (current != R.id.homeFragmentClothes) {
@@ -350,6 +381,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 highlightCategory(R.id.homeFragmentElectronics)
             }
+
         }
     }
 
@@ -363,6 +395,10 @@ class MainActivity : AppCompatActivity() {
                 popEnter = R.anim.slide_in_right
                 popExit = R.anim.slide_out_left
             }
+        }
+        if (current == R.id.homeFragment2) {
+            // maybe show a toast or visual feedback it's the last category
+            return
         }
 
         when (current) {

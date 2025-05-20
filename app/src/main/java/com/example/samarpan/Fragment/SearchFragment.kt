@@ -74,7 +74,6 @@ class SearchFragment : Fragment() {
         setupSearchBar()
     }
 
-
     private fun setupSearchBar() {
         searchView.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -188,10 +187,12 @@ class SearchFragment : Fragment() {
                         )
                     }
                 }
+                if (!isAdded) return
                 loadClothesPosts(clothesRef, electronicsRef)
             }
 
             override fun onCancelled(error: DatabaseError) {
+                if (!isAdded) return
                 swipeRefreshLayout.isRefreshing = false
             }
         })
@@ -221,10 +222,12 @@ class SearchFragment : Fragment() {
                         )
                     }
                 }
+                if (!isAdded) return
                 loadElectronicsPosts(electronicsRef)
             }
 
             override fun onCancelled(error: DatabaseError) {
+                if (!isAdded) return
                 swipeRefreshLayout.isRefreshing = false
             }
         })
@@ -254,6 +257,7 @@ class SearchFragment : Fragment() {
                         )
                     }
                 }
+                if (!isAdded) return
                 saveToCache(unifiedList)
                 filteredList.clear()
                 filteredList.addAll(unifiedList)
@@ -262,6 +266,7 @@ class SearchFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
+                if (!isAdded) return
                 swipeRefreshLayout.isRefreshing = false
             }
         })
@@ -286,22 +291,20 @@ class SearchFragment : Fragment() {
         noDataTextView.visibility = if (filteredList.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    private fun isInternetAvailable(): Boolean {
-        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return cm.activeNetworkInfo?.isConnectedOrConnecting == true
-    }
-
+    // Modified: saveToCache
     private fun saveToCache(posts: List<UnifiedPost>) {
-        val prefs = requireContext().getSharedPreferences("SearchCache", Context.MODE_PRIVATE)
+        val ctx = context ?: return
+        val prefs = ctx.getSharedPreferences("SearchCache", Context.MODE_PRIVATE)
         val editor = prefs.edit()
         val json = Gson().toJson(posts)
         editor.putString(cacheKey, json)
         editor.apply()
     }
 
-
+    // Modified: loadFromCache
     private fun loadFromCache() {
-        val prefs = requireContext().getSharedPreferences("SearchCache", Context.MODE_PRIVATE)
+        val ctx = context ?: return
+        val prefs = ctx.getSharedPreferences("SearchCache", Context.MODE_PRIVATE)
         val json = prefs.getString(cacheKey, null)
         if (!json.isNullOrEmpty()) {
             val type = object : TypeToken<List<UnifiedPost>>() {}.type
@@ -313,4 +316,11 @@ class SearchFragment : Fragment() {
             searchAdapter.updateList(filteredList)
         }
     }
+
+    // Modified: isInternetAvailable
+    private fun isInternetAvailable(): Boolean {
+        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        return cm?.activeNetworkInfo?.isConnectedOrConnecting == true
+    }
+
 }

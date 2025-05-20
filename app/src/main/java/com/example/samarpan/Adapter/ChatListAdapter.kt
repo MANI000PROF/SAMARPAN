@@ -1,5 +1,6 @@
 package com.example.samarpan.Adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +11,7 @@ import com.example.samarpan.R
 import android.text.format.DateFormat
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import com.example.samarpan.FullScreenImageActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -97,6 +99,12 @@ class ChatListAdapter(
 
             binding.root.setOnClickListener {
                 onUserClick(user)
+            }
+            binding.userImage.setOnClickListener {
+                val context = binding.root.context
+                val intent = Intent(context, FullScreenImageActivity::class.java)
+                intent.putExtra("image_url", user.profileImageUrl)
+                context.startActivity(intent)
             }
         }
     }

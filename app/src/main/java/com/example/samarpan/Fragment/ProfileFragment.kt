@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,14 +19,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.UploadCallback
 import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
-import com.example.samarpan.FullScreenImageActivity
 import com.example.samarpan.IntroActivity
 import com.example.samarpan.R
 import com.example.samarpan.SettingsActivity
@@ -57,15 +55,12 @@ class ProfileFragment : Fragment() {
     private lateinit var editProfileBtn: MaterialButton
     private lateinit var historyBtn: MaterialButton
     private lateinit var myConnectionsBtn: MaterialButton
-    private lateinit var nestedScrollView: NestedScrollView
 
     private val auth = FirebaseAuth.getInstance()
     private val dbRef = FirebaseDatabase.getInstance().reference
-    private var startY = 0f
     private var cropTriggered = false
     private var currentProfileScale = 1f
-    private var lastCropTime = 0L
-    private val cropCooldown = 800 // milliseconds
+
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -79,8 +74,6 @@ class ProfileFragment : Fragment() {
         profileImage = view.findViewById(R.id.profileImage)
         appBarLayout = view.findViewById(R.id.appBarLayout)
         toolbar = view.findViewById(R.id.toolbar)
-        userNameTextView = view.findViewById(R.id.userName)
-        userEmailTextView = view.findViewById(R.id.userDetails)
         myDonationsBtn = view.findViewById(R.id.myDonationsBtn)
         settingsBtn = view.findViewById(R.id.settingsBtn)
         myConnectionsBtn = view.findViewById(R.id.myConnectionsBtn)
@@ -93,6 +86,10 @@ class ProfileFragment : Fragment() {
 
         initCloudinary()
         loadUserProfile()
+
+        appBarLayout.post {
+            appBarLayout.setExpanded(false, false)
+        }
 
         profileImage.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
@@ -123,21 +120,40 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
+
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             val percentage = abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
-            val scale = 1 - (percentage * 0.6f)
-            val minScale = 0.4f
+            val scale = 1 - (percentage * 0.75f)
+            val minScale = 0.26f
             val adjustedScale = if (scale < minScale) minScale else scale
-            currentProfileScale = scale.coerceAtLeast(0.4f)
+            currentProfileScale = scale.coerceAtLeast(minScale)
+
             profileImageCard.scaleX = adjustedScale
             profileImageCard.scaleY = adjustedScale
 
             val minTranslationX = toolbar.width / 3.5f
-            val minTranslationY = toolbar.height / 4f
+            val minTranslationY = toolbar.height / 2.2f
             profileImageCard.translationX = percentage * minTranslationX
             profileImageCard.translationY = -percentage * minTranslationY
-        })
 
+            // Corner radius morph
+            val targetSize = profileImageCard.width
+            val startRadius = 30f
+            val endRadius = targetSize / 2f
+            val currentRadius = startRadius + (percentage * (endRadius - startRadius))
+            (profileImageCard as CardView).radius = currentRadius
+            val user = auth.currentUser
+            // Toggle toolbar title
+            if (percentage > 0.9f) {
+                if (user != null) {
+                    toolbar.title = user.displayName
+                }
+                else
+                    toolbar.title = "SAMARPAN"
+            } else {
+                toolbar.title = ""
+            }
+        })
 
         return view
     }
@@ -193,9 +209,6 @@ class ProfileFragment : Fragment() {
     private fun loadUserProfile() {
         val user = auth.currentUser
         user?.let {
-            userNameTextView.text = it.displayName ?: "User Name"
-            userEmailTextView.text = it.email ?: "Email Not Available"
-
             val profileImageUrl = it.photoUrl
             if (profileImageUrl != null) {
                 Glide.with(this).load(profileImageUrl).into(profileImage)

@@ -15,4 +15,6 @@
     <color name="blue">#3b82f6</color>
     <color name="light_gray">#f1f1f1</color>
     <color name="gray_font">#BDBDBD</color>
+    <color name="nav_background">#FFFFFFFF</color> <!-- or use MaterialSurface -->
+    <color name="ripple_color">?attr/colorControlHighlight</color>
 </resources>

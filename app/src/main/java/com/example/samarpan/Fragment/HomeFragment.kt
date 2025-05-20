@@ -8,11 +8,14 @@ import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -43,6 +46,11 @@ class HomeFragment : Fragment() {
     private var userLocation: Location? = null
 
     private val sharedPrefsKey = "cached_food_posts"
+    private var currentFilterMode: FilterMode = FilterMode.LOCATION
+
+    enum class FilterMode {
+        LOCATION, FOOD_NAME, PERSON_NAME, DATE_TIME
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,17 +72,64 @@ class HomeFragment : Fragment() {
         setupSwipeToRefresh()
         loadData()
 
-        binding.filterBtn.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            val location = binding.locationEditText.text.toString().trim()
-            if (location.isEmpty()) {
-                postAdapter.updatePostList(fullPostList, userLocation)
-            } else {
-                val filtered = fullPostList.filter {
-                    it.location?.contains(location, ignoreCase = true) ?: false
+        binding.locationEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString().trim()
+                if (query.isEmpty()) {
+                    postAdapter.updatePostList(fullPostList, userLocation)
+                } else {
+                    val filtered = fullPostList.filter { post ->
+                        when (currentFilterMode) {
+                            FilterMode.LOCATION -> post.location?.contains(query, true) == true
+                            FilterMode.FOOD_NAME -> post.foodTitle?.contains(query, true) == true
+                            FilterMode.PERSON_NAME -> post.profileName?.contains(query, true) == true
+                            FilterMode.DATE_TIME -> {
+                                val formattedTime = formatTimestamp(post.timestamp)
+                                formattedTime.contains(query, ignoreCase = true)
+                            }
+                        }
+                    }
+                    postAdapter.updatePostList(filtered, userLocation)
                 }
-                postAdapter.updatePostList(filtered, userLocation)
             }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        binding.filterBtn.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val popupMenu = PopupMenu(requireContext(), view)
+            popupMenu.menu.apply {
+                add("Location")
+                add("Food Name")
+                add("Person Name")
+                add("Date/Time")
+            }
+
+            popupMenu.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.title.toString()) {
+                    "Location" -> {
+                        currentFilterMode = FilterMode.LOCATION
+                        binding.locationEditText.hint = "Enter location"
+                    }
+                    "Food Name" -> {
+                        currentFilterMode = FilterMode.FOOD_NAME
+                        binding.locationEditText.hint = "Enter food name"
+                    }
+                    "Person Name" -> {
+                        currentFilterMode = FilterMode.PERSON_NAME
+                        binding.locationEditText.hint = "Enter person name"
+                    }
+                    "Date/Time" -> {
+                        currentFilterMode = FilterMode.DATE_TIME
+                        binding.locationEditText.hint = "Enter date/time"
+                    }
+                }
+                true
+            }
+            popupMenu.show()
         }
 
         binding.addPostBtn.setOnClickListener {
@@ -88,6 +143,10 @@ class HomeFragment : Fragment() {
             Log.d("ScrollCheck", "ScrollY: $scrollY — showIcons: $showIcons")
             (activity as? MainActivity)?.setCategoryIconsVisibility(showIcons)
         }
+    }
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("dd MMM yyyy • hh:mm a", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date(timestamp))
     }
 
     override fun onResume() {

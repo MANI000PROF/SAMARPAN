@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -7,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- App Title & Tagline -->
+    <!-- Header -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="wrap_content"
@@ -19,8 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Top Header with Enhanced Style -->
-        <!-- App Name -->
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
@@ -30,10 +29,9 @@
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary"
             android:fontFamily="sans-serif-medium" />
-
     </LinearLayout>
 
-    <!-- Notification Bell -->
+    <!-- Notification -->
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/alertBtn"
         android:layout_width="64dp"
@@ -60,7 +58,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/headerLayout" />
 
-    <!-- Category Icons -->
+    <!-- Category Buttons -->
     <LinearLayout
         android:id="@+id/categoryIcons"
         android:layout_width="wrap_content"
@@ -72,11 +70,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Food -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginHorizontal="8dp"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="16dp"
@@ -86,18 +84,18 @@
                 android:id="@+id/foodBtn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Food"
                 android:padding="12dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/food_icon"
-                app:tint="?attr/colorPrimary" />
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Food" />
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Clothes -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginHorizontal="8dp"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="16dp"
@@ -110,15 +108,15 @@
                 android:padding="12dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/clothes_icon"
-                android:contentDescription="Clothes"
-                app:tint="?attr/colorPrimary" />
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Clothes" />
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Electronics -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginHorizontal="8dp"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="16dp"
@@ -131,8 +129,8 @@
                 android:padding="12dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/electronics_icon"
-                android:contentDescription="Electronics"
-                app:tint="?attr/colorPrimary" />
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Electronics" />
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
@@ -143,36 +141,39 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="64dp"
+        android:clipToPadding="false"
+        android:fitsSystemWindows="false"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@id/cardView"
-        app:layout_constraintTop_toBottomOf="@id/categoryIcons"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/categoryIcons"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- Elevated Bottom Navigation Bar -->
+    <!-- Chat FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/chatBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/teal_700"
         android:contentDescription="Chat Page"
         android:src="@drawable/ic_chat"
-        app:layout_constraintBottom_toTopOf="@+id/cardView"
+        app:layout_constraintBottom_toTopOf="@id/bottomBarContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="?attr/colorOnSurface"
-        android:backgroundTint="@color/teal_700"/>
+        app:tint="?attr/colorOnSurface" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardView"
+    <!-- Bottom Navigation + Floating Leaderboard Icon -->
+    <FrameLayout
+        android:id="@+id/bottomBarContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:elevation="2dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="1dp"
-        app:cardBackgroundColor="@color/colorPrimary"
+        android:background="@android:color/transparent"
+        android:layout_gravity="bottom"
+        android:clickable="false"
+        android:focusable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -180,13 +181,27 @@
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigationView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/bottom_menu"
+            android:layout_height="64dp"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            app:elevation="5dp"
             app:itemIconTint="@color/nav_item_color"
+            app:itemRippleColor="?attr/colorControlHighlight"
             app:itemTextColor="@color/nav_item_color"
-            android:background="@android:color/transparent"
-            app:backgroundTint="@android:color/transparent"
-            app:itemRippleColor="@android:color/transparent"/>
-    </com.google.android.material.card.MaterialCardView>
+            app:labelVisibilityMode="unlabeled"
+            app:menu="@menu/bottom_menu" />
 
+        <!-- Overlapping Leaderboard Icon -->
+        <ImageView
+            android:id="@+id/fabLeaderboardIcon"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center|bottom"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/leaderboard_icon_bg"
+            android:elevation="8dp"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_leaderboard" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
