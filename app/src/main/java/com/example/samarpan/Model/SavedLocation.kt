@@ -1,6 +1,10 @@
 package com.example.samarpan.Model
 
 data class SavedLocation(
-    val locationName: String,
-    val locationAddress: String
+    var name: String = "",
+    var address: String = "",
+    var latitude: Double = 0.0,
+    var longitude: Double = 0.0,
+    var key: String = "",
+    var primary: Boolean = false
 )

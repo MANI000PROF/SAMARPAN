@@ -5,37 +5,47 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/animated_gradient"
     tools:context=".IntroActivity">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
-        android:layout_marginTop="128dp"
-        app:cardCornerRadius="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- Heart appears first -->
+    <ImageView
+        android:id="@+id/logoHeart"
+        android:layout_width="200dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="108dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/transparent_logo_heart"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="350dp"
-            android:layout_height="350dp"
-            android:layout_gravity="center"
-            android:src="@drawable/samarpan_logo" />
-    </androidx.cardview.widget.CardView>
+    <!-- Hand appears below heart -->
+    <ImageView
+        android:id="@+id/logoHand"
+        android:layout_width="350dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="0dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/transparent_logo_hand"
+        app:layout_constraintTop_toBottomOf="@+id/logoHeart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Tagline under hand -->
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tagLine"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="cursive"
         android:gravity="center"
-        android:text="Supporting Assistance Through Meals And Resources for People Across Needs"
+        android:text=""
+        android:textColor="?attr/colorOnSurface"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/cardView"
-        app:layout_constraintStart_toStartOf="@+id/cardView"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+        app:layout_constraintTop_toBottomOf="@+id/logoHand"
+        app:layout_constraintStart_toStartOf="@+id/logoHand"
+        app:layout_constraintEnd_toEndOf="@+id/logoHand" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

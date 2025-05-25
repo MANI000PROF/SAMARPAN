@@ -1,6 +1,7 @@
 package com.example.samarpan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -62,6 +63,7 @@ class LocationPickerActivity : AppCompatActivity() {
         requestLocationPermission()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupMap() {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
