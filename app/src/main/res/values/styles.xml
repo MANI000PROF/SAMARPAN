@@ -12,6 +12,14 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?attr/colorControlHighlight</item>
     </style>
+    <!-- res/values/styles.xml -->
+    <style name="BottomRoundedCardShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">36dp</item>
+        <item name="cornerSizeBottomRight">36dp</item>
+    </style>
 
     <style name="ThemeOverlay.Samarpan.Menu" parent="Theme.Material3.DayNight.Dialog">
         <item name="android:windowBackground">@color/colorPrimary</item>

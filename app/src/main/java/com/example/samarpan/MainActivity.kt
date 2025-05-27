@@ -13,23 +13,23 @@ import com.example.samarpan.Fragment.BottomAlertsFragment
 import com.example.samarpan.Fragment.MenuFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import androidx.core.view.ViewCompat
 import androidx.navigation.navOptions
 import com.example.samarpan.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
     private val NOTIFICATION_PERMISSION_CODE = 1001
-    private lateinit var gestureDetector: GestureDetector
     private lateinit var binding: ActivityMainBinding
-    private val TAG = "SwipeGesture"
+    private var currentCategoryId = R.id.homeFragment2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this)
@@ -50,37 +50,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            private val SWIPE_THRESHOLD = 100
-            private val SWIPE_VELOCITY_THRESHOLD = 100
-
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (e1 == null) return false
-                val diffX = e2.x - e1.x
-                val diffY = e2.y - e1.y
-
-                if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffX > 0) {
-                            Log.d("SwipeGesture", "Swipe Right")
-                            onSwipeRight()
-                        } else {
-                            Log.d("SwipeGesture", "Swipe Left")
-                            onSwipeLeft()
-                        }
-                        return true
-                    }
-                }
-                return false
-            }
-        })
-
-
+        setupHeaderHeight()
         val appName = binding.textView4
         appName.alpha = 0f
         appName.translationY = -30f
@@ -101,12 +71,6 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             highlightCategory(destination.id)
 
-            val showIcons = when (destination.id) {
-                R.id.homeFragment2,
-                R.id.homeFragmentClothes,
-                R.id.homeFragmentElectronics -> true
-                else -> false
-            }
             val showChatButton = when (destination.id) {
                 R.id.homeFragment2,
                 R.id.homeFragmentClothes,
@@ -114,36 +78,14 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
 
-            if (showIcons) {
-                if (iconsLayout.visibility != View.VISIBLE) {
-                    iconsLayout.visibility = View.VISIBLE
-                    iconsLayout.animate().alpha(1f).translationY(0f).setDuration(300).start()
-                }
-                if (appName.visibility != View.VISIBLE) {
-                    appName.visibility = View.VISIBLE
-                    appName.animate().alpha(1f).translationY(0f).setDuration(300).start()
-                }
-                if (menuBtn.visibility != View.VISIBLE) {
-                    menuBtn.visibility = View.VISIBLE
-                    menuBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
-                }
-                if (alertBtn.visibility != View.VISIBLE) {
-                    alertBtn.visibility = View.VISIBLE
-                    alertBtn.animate().alpha(1f).translationY(0f).setDuration(300).start()
-                }
+            val isHomeFragment = destination.id == R.id.homeFragment2 ||
+                    destination.id == R.id.homeFragmentClothes ||
+                    destination.id == R.id.homeFragmentElectronics
 
+            if (isHomeFragment) {
+                showTopHeaderSmooth()
             } else {
-                iconsLayout.animate().alpha(0f).translationY(-iconsLayout.height.toFloat()).setDuration(300)
-                    .withEndAction { iconsLayout.visibility = View.GONE }.start()
-
-                appName.animate().alpha(0f).translationY(-30f).setDuration(300)
-                    .withEndAction { appName.visibility = View.GONE }.start()
-
-                menuBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
-                    .withEndAction { menuBtn.visibility = View.GONE }.start()
-
-                alertBtn.animate().alpha(0f).translationY(-30f).setDuration(300)
-                    .withEndAction { alertBtn.visibility = View.GONE }.start()
+                hideTopHeaderSmooth()
             }
 
             // Control visibility of chat button based on the fragment
@@ -173,8 +115,8 @@ class MainActivity : AppCompatActivity() {
             val iconView = (itemView as ViewGroup).getChildAt(0)
 
             iconView.animate()
-                .scaleX(1.2f)
-                .scaleY(1.2f)
+                .scaleX(1.3f)
+                .scaleY(1.3f)
                 .setDuration(150)
                 .withEndAction {
                     iconView.animate()
@@ -192,15 +134,19 @@ class MainActivity : AppCompatActivity() {
 
             when (item.itemId) {
                 R.id.homeFragment2 -> if (navController.currentDestination?.id != R.id.homeFragment2) {
+                    itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     navController.navigate(R.id.homeFragment2, null, options)
                 }
                 R.id.historyFragment2 -> if (navController.currentDestination?.id != R.id.historyFragment2) {
+                    itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     navController.navigate(R.id.historyFragment2, null, options)
                 }
                 R.id.searchFragment2 -> if (navController.currentDestination?.id != R.id.searchFragment2) {
+                    itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     navController.navigate(R.id.searchFragment2, null, options)
                 }
                 R.id.profileFragment2 -> if (navController.currentDestination?.id != R.id.profileFragment2) {
+                    itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     navController.navigate(R.id.profileFragment2, null, options)
                 }
             }
@@ -284,29 +230,52 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setCategoryIconsVisibility(show: Boolean) {
-        val iconsLayout = binding.categoryIcons ?: return
+    private var originalHeaderHeight = -1
+    private var isHeaderVisible = true
 
-        Log.d("CategoryIcons", "setCategoryIconsVisibility called with show = $show")
+    fun hideTopHeaderSmooth() {
+        val header = binding.topHeaderContainer
+        if (!isHeaderVisible || originalHeaderHeight <= 0) return
 
-        val isVisible = iconsLayout.visibility == View.VISIBLE
+        val animator = ValueAnimator.ofInt(header.height, 0)
+        animator.addUpdateListener {
+            val newHeight = it.animatedValue as Int
+            header.layoutParams.height = newHeight
+            header.requestLayout()
+            header.alpha = newHeight / originalHeaderHeight.toFloat()
+        }
+        animator.duration = 300
+        animator.start()
 
-        if (show && !isVisible) {
-            iconsLayout.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(300)
-                .withStartAction { iconsLayout.visibility = View.VISIBLE }
-                .start()
-        } else if (!show && isVisible) {
-            iconsLayout.animate()
-                .alpha(0f)
-                .translationY(-iconsLayout.height.toFloat())
-                .setDuration(300)
-                .withEndAction { iconsLayout.visibility = View.GONE }
-                .start()
+        isHeaderVisible = false
+    }
+
+    fun showTopHeaderSmooth() {
+        val header = binding.topHeaderContainer
+        if (isHeaderVisible || originalHeaderHeight <= 0) return
+
+        val animator = ValueAnimator.ofInt(0, originalHeaderHeight)
+        animator.addUpdateListener {
+            val newHeight = it.animatedValue as Int
+            header.layoutParams.height = newHeight
+            header.requestLayout()
+            header.alpha = newHeight / originalHeaderHeight.toFloat()
+        }
+        animator.duration = 300
+        animator.start()
+
+        isHeaderVisible = true
+    }
+
+    fun setupHeaderHeight() {
+        val header = binding.topHeaderContainer
+        if (originalHeaderHeight == -1) {
+            header.post {
+                originalHeaderHeight = header.height
+            }
         }
     }
+
     fun updateAlertAnimation(hasAlerts: Boolean) {
         val alertBtn = binding.alertBtn
         if (hasAlerts) {
@@ -317,12 +286,6 @@ class MainActivity : AppCompatActivity() {
             alertBtn.progress = 0f // Reset to start frame
             alertBtn.repeatCount = 0
         }
-    }
-
-
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        gestureDetector.onTouchEvent(ev)
-        return super.dispatchTouchEvent(ev)
     }
 
     private fun checkNotificationPermission() {
@@ -350,80 +313,118 @@ class MainActivity : AppCompatActivity() {
         foodBtn.setColorFilter(if (active == R.id.homeFragment2) activeColor else defaultColor)
         clothesBtn.setColorFilter(if (active == R.id.homeFragmentClothes) activeColor else defaultColor)
         electronicsBtn.setColorFilter(if (active == R.id.homeFragmentElectronics) activeColor else defaultColor)
-    }
 
-    private fun onSwipeLeft() {
-        val current = navController.currentDestination?.id
-        val options = navOptions {
-            launchSingleTop = true
-            popUpTo(R.id.homeFragment2) { inclusive = false } // Update popUpTo as needed
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-        if (current == R.id.homeFragmentElectronics) {
-            // maybe show a toast or visual feedback it's the last category
-            return
-        }
-        when (current) {
-            R.id.homeFragment2 -> {
-                if (current != R.id.homeFragmentClothes) {
-                    navController.navigate(R.id.homeFragmentClothes, null, options)
-                }
-                highlightCategory(R.id.homeFragmentClothes)
-            }
-            R.id.homeFragmentClothes -> {
-                if (navController.currentDestination?.id != R.id.homeFragmentElectronics) {
-                    navController.navigate(R.id.homeFragmentElectronics, null, options)
-                }
-                highlightCategory(R.id.homeFragmentElectronics)
-            }
-
-        }
-    }
-
-    private fun onSwipeRight() {
-        val current = navController.currentDestination?.id
-        val options = navOptions {
-            launchSingleTop = true
-            anim {
-                enter = R.anim.slide_in_left
-                exit = R.anim.slide_out_right
-                popEnter = R.anim.slide_in_right
-                popExit = R.anim.slide_out_left
-            }
-        }
-        if (current == R.id.homeFragment2) {
-            // maybe show a toast or visual feedback it's the last category
-            return
+        // Change header background
+        val newDrawableId = when (active) {
+            R.id.homeFragment2 -> R.drawable.food_bg_5
+            R.id.homeFragmentClothes -> R.drawable.clothes_bg_6
+            R.id.homeFragmentElectronics -> R.drawable.electronics_bg_1
+            else -> R.drawable.food_bg_5
         }
 
-        when (current) {
-            R.id.homeFragmentElectronics -> {
-                if (current != R.id.homeFragmentClothes) {
-                    navController.navigate(R.id.homeFragmentClothes, null, options)
-                }
-                highlightCategory(R.id.homeFragmentClothes)
-            }
-            R.id.homeFragmentClothes -> {
-                if (current != R.id.homeFragment2) {
-                    navController.navigate(R.id.homeFragment2, null, options)
-                }
-                highlightCategory(R.id.homeFragment2)
-            }
+        // Determine direction
+        val direction = when {
+            currentCategoryId == R.id.homeFragment2 && active == R.id.homeFragmentClothes -> "right"
+            currentCategoryId == R.id.homeFragmentClothes && active == R.id.homeFragmentElectronics -> "right"
+            currentCategoryId == R.id.homeFragment2 && active == R.id.homeFragmentElectronics -> "right"
+
+            currentCategoryId == R.id.homeFragmentClothes && active == R.id.homeFragment2 -> "left"
+            currentCategoryId == R.id.homeFragmentElectronics && active == R.id.homeFragmentClothes -> "left"
+            currentCategoryId == R.id.homeFragmentElectronics && active == R.id.homeFragment2 -> "left"
+
+            else -> "right" // fallback
         }
+
+        animateHeaderBgChange(newDrawableId, direction)
     }
 
     private fun navigateToIfNotCurrent(destinationId: Int) {
         if (navController.currentDestination?.id != destinationId) {
+            val (enterAnim, exitAnim, popEnterAnim, popExitAnim) = when {
+                currentCategoryId == R.id.homeFragment2 && destinationId == R.id.homeFragmentClothes -> listOf(
+                    R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right
+                )
+                currentCategoryId == R.id.homeFragmentClothes && destinationId == R.id.homeFragment2 -> listOf(
+                    R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_left
+                )
+                currentCategoryId == R.id.homeFragmentClothes && destinationId == R.id.homeFragmentElectronics -> listOf(
+                    R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right
+                )
+                currentCategoryId == R.id.homeFragmentElectronics && destinationId == R.id.homeFragmentClothes -> listOf(
+                    R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_left
+                )
+                currentCategoryId == R.id.homeFragment2 && destinationId == R.id.homeFragmentElectronics -> listOf(
+                    R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right
+                )
+                currentCategoryId == R.id.homeFragmentElectronics && destinationId == R.id.homeFragment2 -> listOf(
+                    R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_left
+                )
+                else -> listOf(0, 0, 0, 0) // fallback
+            }
+
             val options = navOptions {
                 launchSingleTop = true
-                popUpTo(R.id.homeFragment2) { inclusive = false } // Update popUpTo as needed
+                popUpTo(R.id.homeFragment2) { inclusive = false }
+                anim {
+                    enter = enterAnim
+                    exit = exitAnim
+                    popEnter = popEnterAnim
+                    popExit = popExitAnim
+                }
             }
+
             navController.navigate(destinationId, null, options)
+            currentCategoryId = destinationId
         }
     }
+
+    private fun animateHeaderBgChange(newResId: Int, direction: String) {
+        val imageView = binding.headerBg
+        val parent = imageView.parent as ViewGroup
+
+        val outTranslation = if (direction == "left") -imageView.width.toFloat() else imageView.width.toFloat()
+        val inTranslation = if (direction == "left") imageView.width.toFloat() else -imageView.width.toFloat()
+
+        val oldImage = imageView.drawable
+
+        // Create temporary overlay for old image
+        val overlay = androidx.appcompat.widget.AppCompatImageView(this).apply {
+            layoutParams = imageView.layoutParams
+            setImageDrawable(oldImage)
+            translationX = 0f
+            alpha = 1f
+        }
+
+        // Add overlay BELOW the imageView to avoid flicker
+        parent.addView(overlay, parent.indexOfChild(imageView))
+
+        // Enable hardware layers for smooth animation
+        ViewCompat.setLayerType(imageView, View.LAYER_TYPE_HARDWARE, null)
+        ViewCompat.setLayerType(overlay, View.LAYER_TYPE_HARDWARE, null)
+
+        // Prepare imageView for incoming animation
+        imageView.translationX = inTranslation
+        imageView.setImageResource(newResId)
+
+        // Animate overlay (old image) out
+        overlay.animate()
+            .translationX(outTranslation)
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                parent.removeView(overlay)
+                // Clear hardware layer after animation
+                ViewCompat.setLayerType(imageView, View.LAYER_TYPE_NONE, null)
+            }
+            .start()
+
+        // Animate imageView (new image) in
+        imageView.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(300)
+            .start()
+    }
+
+
 }

@@ -8,6 +8,8 @@ import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -49,6 +51,13 @@ class HomeFragmentElectronics : Fragment() {
     private val sharedPrefsKey = "cached_electronics_posts"
     private var currentFilterMode: FilterMode = FilterMode.LOCATION
 
+    private var scrollDySum = 0
+    private var isHeaderHidden = false
+    private var canShowHeader = true
+    private val scrollThreshold = 100
+    private val headerCooldownMillis = 300L
+    private var lastScrollDirection = 0
+
     enum class FilterMode {
         LOCATION, ELECTRONICS_NAME, PERSON_NAME, DATE_TIME
     }
@@ -67,14 +76,7 @@ class HomeFragmentElectronics : Fragment() {
 
         setupImageSlider()
         setupRecyclerView()
-        binding.imageSlider.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    v.parent?.requestDisallowInterceptTouchEvent(true)
-                }
-            }
-            false
-        }
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         getUserLocation()
 
@@ -146,10 +148,42 @@ class HomeFragmentElectronics : Fragment() {
             val addPostElectronicsBottomSheet = AddPostElectronicsBottomSheet()
             addPostElectronicsBottomSheet.show(parentFragmentManager, "AddPostElectronicsBottomSheet")
         }
-        binding.nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            val showIcons = scrollY == 0
-            Log.d("ScrollCheck", "ScrollY: $scrollY — showIcons: $showIcons")
-            (activity as? MainActivity)?.setCategoryIconsVisibility(showIcons)
+
+        val mainActivity = activity as? MainActivity ?: return
+
+        binding.nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            val dy = scrollY - oldScrollY
+
+            if (kotlin.math.abs(dy) < 5) return@setOnScrollChangeListener
+
+            // Detect direction change
+            val currentDirection = if (dy > 0) 1 else -1
+            if (currentDirection != lastScrollDirection) {
+                scrollDySum = 0
+                lastScrollDirection = currentDirection
+            }
+
+            scrollDySum += dy
+
+            // Hide when scrolling up enough
+            if (scrollDySum > scrollThreshold && !isHeaderHidden) {
+                mainActivity.hideTopHeaderSmooth()
+                isHeaderHidden = true
+                canShowHeader = false
+                scrollDySum = 0
+
+                // Lock re-showing for a short duration to prevent bounce
+                Handler(Looper.getMainLooper()).postDelayed({
+                    canShowHeader = true
+                }, headerCooldownMillis)
+            }
+
+            // Show only if allowed and scrolled down enough
+            if (scrollDySum < -scrollThreshold && isHeaderHidden && canShowHeader) {
+                mainActivity.showTopHeaderSmooth()
+                isHeaderHidden = false
+                scrollDySum = 0
+            }
         }
     }
     private fun formatTimestamp(timestamp: Long): String {
@@ -162,12 +196,42 @@ class HomeFragmentElectronics : Fragment() {
     }
 
     private fun setupImageSlider() {
-        val imageList = arrayListOf(
+        val imageList1 = arrayListOf(
             SlideModel(R.drawable.donation_elec_1, ScaleTypes.CENTER_CROP),
             SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP),
             SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP)
         )
-        binding.imageSlider.setImageList(imageList, ScaleTypes.FIT)
+        val imageList2 = arrayListOf(
+            SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.electronics_bg_1, ScaleTypes.CENTER_CROP)
+        )
+        val imageList3 = arrayListOf(
+            SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.electronics_bg_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_1, ScaleTypes.CENTER_CROP)
+        )
+        val imageList4 = arrayListOf(
+            SlideModel(R.drawable.electronics_bg_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP)
+        )
+        val imageList5 = arrayListOf(
+            SlideModel(R.drawable.donation_elec_1, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP)
+        )
+        val imageList6 = arrayListOf(
+            SlideModel(R.drawable.donation_elec_2, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.donation_elec_3, ScaleTypes.CENTER_CROP),
+            SlideModel(R.drawable.electronics_bg_1, ScaleTypes.CENTER_CROP)
+        )
+        binding.imageSlider1.setImageList(imageList1, ScaleTypes.FIT)
+        binding.imageSlider2.setImageList(imageList2, ScaleTypes.FIT)
+        binding.imageSlider3.setImageList(imageList3, ScaleTypes.FIT)
+        binding.imageSlider4.setImageList(imageList4, ScaleTypes.FIT)
+        binding.imageSlider5.setImageList(imageList5, ScaleTypes.FIT)
+        binding.imageSlider6.setImageList(imageList6, ScaleTypes.FIT)
     }
 
     private fun setupRecyclerView() {

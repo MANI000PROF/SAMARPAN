@@ -15,27 +15,143 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:orientation="vertical">
 
-            <!-- Image Slider Section -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView2"
+            <!-- Horizontally scrollable slider row -->
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="15dp">
+                android:layout_height="120dp"
+                android:scrollbars="none"
+                android:paddingBottom="8dp">
 
-                <com.denzcoskun.imageslider.ImageSlider
-                    android:id="@+id/imageSlider"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:iss_auto_cycle="true"
-                    app:iss_delay="2000"
-                    app:iss_no_dots="true"
-                    app:iss_period="2000"
-                    app:iss_text_align="CENTER" />
-            </androidx.cardview.widget.CardView>
+                <LinearLayout
+                    android:id="@+id/imageSliderLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingEnd="8dp">
+
+                    <!-- Slider 1 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="12dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Slider 2 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="12dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Slider 3 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider3"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Slider 4 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider4"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Slider 5 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider5"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Slider 6 -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="16dp"
+                        android:layout_marginBottom="8dp"
+                        app:cardElevation="4dp">
+
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/imageSlider6"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:iss_auto_cycle="true"
+                            app:iss_delay="2000"
+                            app:iss_no_dots="true"
+                            app:iss_period="2000"
+                            app:iss_text_align="CENTER" />
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <!-- Filter & Location Section -->
             <LinearLayout
@@ -43,7 +159,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/addPostBtn"
@@ -90,6 +208,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:layout_marginBottom="8dp" />
 
             <!-- No Posts Placeholder -->
