@@ -1,15 +1,20 @@
 package com.example.samarpan.Adapter
 
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samarpan.Model.ChatMessage
 import com.example.samarpan.R
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatMessageAdapter(
     private val chatMessages: List<ChatMessage>,
@@ -30,13 +35,14 @@ class ChatMessageAdapter(
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
-
         return ChatViewHolder(view)
     }
 
+    @Suppress("RecyclerView")
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val chatMessage = chatMessages[position]
-        // Common long click listener for delete
+
+        // Handle long click
         holder.itemView.setOnLongClickListener {
             val adapterPosition = holder.adapterPosition
             if (adapterPosition != RecyclerView.NO_POSITION) {
@@ -45,31 +51,37 @@ class ChatMessageAdapter(
             true
         }
 
-        // Handle Quoted Message (Reply)
+        // Handle reply
         if (chatMessage.replyToMessageId != null) {
-            // Fetch the original message using the `replyToMessageId`
             val repliedMessage = getRepliedMessageById(chatMessage.replyToMessageId!!)
-            holder.quotedMessageTextView.visibility = View.VISIBLE
+            holder.replyLayout.visibility = View.VISIBLE
             holder.quotedMessageTextView.text = repliedMessage?.message ?: "Message not found"
         } else {
-            holder.quotedMessageTextView.visibility = View.GONE
+            holder.replyLayout.visibility = View.GONE
         }
 
+        // Handle audio
         if (!chatMessage.audioUrl.isNullOrEmpty()) {
             holder.messageTextView.visibility = View.GONE
             holder.audioLayout.visibility = View.VISIBLE
-            holder.audioDuration.text = "Audio"
 
-            holder.playButton.setImageResource(R.drawable.ic_play)
+            holder.playButton.setImageResource(
+                if (currentlyPlayingPosition == position && mediaPlayer?.isPlaying == true)
+                    R.drawable.ic_pause
+                else
+                    R.drawable.ic_play
+            )
+
+            // Get audio duration
+            val duration = getAudioDuration(chatMessage.audioUrl!!)
+            holder.audioDuration.text = duration
+
             holder.playButton.setOnClickListener {
-                val adapterPosition = holder.adapterPosition
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    if (currentlyPlayingPosition == adapterPosition) {
-                        stopAudio(holder)
-                    } else {
-                        playAudio(chatMessage.audioUrl!!, holder)
-                        currentlyPlayingPosition = adapterPosition
-                    }
+                if (currentlyPlayingPosition == position) {
+                    stopAudio(holder)
+                } else {
+                    playAudio(chatMessage.audioUrl!!, holder)
+                    currentlyPlayingPosition = position
                 }
             }
         } else {
@@ -78,25 +90,23 @@ class ChatMessageAdapter(
             holder.messageTextView.text = chatMessage.message
         }
 
-        // Handle the timestamp visibility and background
-        if (timestampVisibilityMap[chatMessage.replyToMessageId] == true) {
-            holder.timestampTextView.visibility = View.VISIBLE
-            holder.timestampTextView.text = chatMessage.timestamp.toString()
-        } else {
-            holder.timestampTextView.visibility = View.GONE
+        // Timestamp
+        val showTimestamp = timestampVisibilityMap[chatMessage.messageId] == true
+        holder.timestampTextView.visibility = if (showTimestamp) View.VISIBLE else View.GONE
+        if (showTimestamp) {
+            holder.timestampTextView.text = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                .format(Date(chatMessage.timestamp))
         }
     }
 
-    // Helper function to get the replied message (this can be fetched from your data source)
     private fun getRepliedMessageById(replyToMessageId: String): ChatMessage? {
-        return chatMessages.find { it.replyToMessageId == replyToMessageId }
+        return chatMessages.find { it.messageId == replyToMessageId }
     }
 
     override fun getItemCount(): Int = chatMessages.size
 
     override fun getItemViewType(position: Int): Int {
-        val chatMessage = chatMessages[position]
-        return if (chatMessage.senderId == currentUserId) VIEW_TYPE_SENT else VIEW_TYPE_RECEIVED
+        return if (chatMessages[position].senderId == currentUserId) VIEW_TYPE_SENT else VIEW_TYPE_RECEIVED
     }
 
     inner class ChatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -106,6 +116,7 @@ class ChatMessageAdapter(
         val audioDuration: TextView = view.findViewById(R.id.audioDuration)
         val timestampTextView: TextView = view.findViewById(R.id.timestampTextView)
         val quotedMessageTextView: TextView = view.findViewById(R.id.quotedMessageTextView)
+        val replyLayout: View = view.findViewById(R.id.replyLayout)
     }
 
     private fun playAudio(url: String, holder: ChatViewHolder) {
@@ -127,26 +138,41 @@ class ChatMessageAdapter(
 
             } catch (e: IOException) {
                 e.printStackTrace()
+                Toast.makeText(holder.itemView.context, "Error playing audio", Toast.LENGTH_SHORT).show()
+                holder.playButton.setImageResource(R.drawable.ic_play)
             }
         }
     }
 
     private fun stopAudio(holder: ChatViewHolder?) {
         mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.stop()
-            }
+            if (it.isPlaying) it.stop()
             it.release()
-            mediaPlayer = null
         }
+        mediaPlayer = null
+        currentlyPlayingPosition = -1
 
         holder?.playButton?.setImageResource(R.drawable.ic_play)
-        currentlyPlayingPosition = -1
     }
 
     private fun releaseMediaPlayer() {
         mediaPlayer?.release()
         mediaPlayer = null
+    }
+
+    private fun getAudioDuration(url: String): String {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(url, HashMap())
+            val durationMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+            retriever.release()
+
+            val seconds = (durationMs / 1000) % 60
+            val minutes = (durationMs / 1000) / 60
+            String.format("%02d:%02d", minutes, seconds)
+        } catch (e: Exception) {
+            "00:00"
+        }
     }
 
     companion object {

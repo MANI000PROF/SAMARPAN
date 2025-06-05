@@ -14,5 +14,6 @@ data class DonationPostsElectronics(
     val donorId: String? = null,       // ID of the user (donor) who created the post
     val timestamp: Long = 0L,           // Timestamp for the post
     val userId: String? = null, // 🔥 Add this
-    val category: String? = null
+    val category: String? = null,
+    val status: String? = "available" // Default to "available"
 ) : Serializable

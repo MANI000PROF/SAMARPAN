@@ -249,7 +249,21 @@ class BottomAlertsFragment : BottomSheetDialogFragment() {
                     if (direction == ItemTouchHelper.RIGHT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Accepted")
                         sendPushNotificationToRequester(alert, "Accepted")
-                    } else if (direction == ItemTouchHelper.LEFT) {
+
+                        // 🔥 Update the status of the associated donation post to "unavailable"
+                        alert.postId?.let { postId ->
+                            FirebaseDatabase.getInstance().getReference("DonationPosts").child(postId)
+                                .child("status")
+                                .setValue("unavailable")
+                                .addOnSuccessListener {
+                                    Log.d("PostStatusUpdate", "Post status updated to unavailable")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("PostStatusUpdate", "Failed to update post status", e)
+                                }
+                        }
+                    }
+                    else if (direction == ItemTouchHelper.LEFT) {
                         alertAdapter.updateRequestStatusExternally(alert, "Declined")
                         sendPushNotificationToRequester(alert, "Declined")
                     }

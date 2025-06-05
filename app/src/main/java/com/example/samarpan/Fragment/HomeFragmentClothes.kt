@@ -302,20 +302,26 @@ class HomeFragmentClothes : Fragment() {
                 for (dataSnapshot in snapshot.children) {
                     val postMap = dataSnapshot.value as? Map<*, *>
                     if (postMap != null) {
-                        val post = DonationPostsClothes(
-                            postId = postMap["postId"] as? String,
-                            profileName = postMap["profileName"] as? String,
-                            location = postMap["location"] as? String,
-                            clothesTitle = postMap["clothesTitle"] as? String,
-                            clothesDescription = postMap["clothesDescription"] as? String,
-                            clothesImage = postMap["clothesImage"] as? String,
-                            latitude = (postMap["latitude"] as? Number)?.toDouble(),
-                            longitude = (postMap["longitude"] as? Number)?.toDouble(),
-                            donorId = postMap["donorId"] as? String,
-                            timestamp = (postMap["timestamp"] as? Number)?.toLong() ?: 0L,
-                            userId = postMap["userId"] as? String
-                        )
-                        postList.add(post)
+                        val status = postMap["status"] as? String ?: "available" // fallback
+
+                        if (status == "available") {
+                            val post = DonationPostsClothes(
+                                postId = postMap["postId"] as? String,
+                                profileName = postMap["profileName"] as? String,
+                                location = postMap["location"] as? String,
+                                clothesTitle = postMap["foodTitle"] as? String,
+                                clothesDescription = postMap["foodDescription"] as? String,
+                                clothesImage = postMap["foodImage"] as? String,
+                                latitude = (postMap["latitude"] as? Number)?.toDouble(),
+                                longitude = (postMap["longitude"] as? Number)?.toDouble(),
+                                donorId = postMap["donorId"] as? String,
+                                timestamp = (postMap["timestamp"] as? Number)?.toLong() ?: 0L,
+                                userId = postMap["userId"] as? String,
+                                category = postMap["category"] as? String,
+                                status = status // 👈 add this
+                            )
+                            postList.add(post)
+                        }
                     }
                 }
 

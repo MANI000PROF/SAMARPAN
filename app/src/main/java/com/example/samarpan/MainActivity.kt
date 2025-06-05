@@ -17,6 +17,7 @@ import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.navigation.navOptions
 import com.example.samarpan.databinding.ActivityMainBinding
@@ -48,6 +49,11 @@ class MainActivity : AppCompatActivity() {
                         .setValue(token)
                 }
             }
+        }
+
+        val headerBg = findViewById<ImageView>(R.id.headerBg)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            headerBg.clipToOutline = true
         }
 
         setupHeaderHeight()

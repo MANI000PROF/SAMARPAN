@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Geocoder
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -153,9 +152,15 @@ class EditPostActivity : AppCompatActivity() {
         }
 
         if (requestCode == LOCATION_PICKER_REQUEST && resultCode == Activity.RESULT_OK) {
-            selectedLatitude = data?.getDoubleExtra("latitude", 0.0) ?: 0.0
-            selectedLongitude = data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-            inputLocation.setText(getAddressFromCoordinates(selectedLatitude, selectedLongitude))
+            val lat = data?.getDoubleExtra("latitude", 0.0) ?: 0.0
+            val lon = data?.getDoubleExtra("longitude", 0.0) ?: 0.0
+
+            // Only update if the location is actually selected (non-zero)
+            if (lat != 0.0 || lon != 0.0) {
+                selectedLatitude = lat
+                selectedLongitude = lon
+                inputLocation.setText(getAddressFromCoordinates(lat, lon))
+            }
         }
     }
 
@@ -297,7 +302,8 @@ class EditPostActivity : AppCompatActivity() {
                 "foodTitle" to inputTitle.text.toString(),
                 "foodDescription" to inputDescription.text.toString(),
                 "foodImage" to (newImageUrl ?: imageUrl),
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
             "Clothes" -> mapOf(
                 "profileName" to inputProfileName.text.toString(),
@@ -307,7 +313,8 @@ class EditPostActivity : AppCompatActivity() {
                 "clothesTitle" to inputTitle.text.toString(),
                 "clothesDescription" to inputDescription.text.toString(),
                 "clothesImage" to (newImageUrl ?: imageUrl),
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
             "Electronics" -> mapOf(
                 "profileName" to inputProfileName.text.toString(),
@@ -317,7 +324,8 @@ class EditPostActivity : AppCompatActivity() {
                 "electronicsTitle" to inputTitle.text.toString(),
                 "electronicsDescription" to inputDescription.text.toString(),
                 "electronicsImage" to (newImageUrl ?: imageUrl),
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
             else -> return
         }

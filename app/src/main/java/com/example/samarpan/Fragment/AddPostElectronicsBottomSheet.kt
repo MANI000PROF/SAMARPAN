@@ -338,7 +338,8 @@ class AddPostElectronicsBottomSheet : BottomSheetDialogFragment() {
                 "electronicsTitle" to electronicsTitle,
                 "electronicsDescription" to electronicsDescription,
                 "electronicsImage" to imageUrl,
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
 
             database.child(postId).setValue(postDetails).addOnCompleteListener {

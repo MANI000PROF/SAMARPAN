@@ -206,6 +206,8 @@ class HistoryFragment : Fragment() {
                         putExtra("description", post.description)
                         putExtra("imageUrl", post.imageUrl)
                         putExtra("category", post.category)
+                        putExtra("latitude", post.latitude)
+                        putExtra("longitude", post.longitude)
                     }
                     historyAdapter.notifyItemChanged(position)
                     startActivity(intent)

@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".ChatActivity">
     <!-- Top AppBar with Title and Back Button -->
+
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="0dp"
@@ -66,14 +67,63 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/recordingPopup"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:background="@drawable/recording_popup_bg"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/inputSection"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="8dp">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/recordingMicAnimation"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/ic_mic_animated" />
+
+        <com.example.samarpan.WaveformView
+            android:id="@+id/recordingWaveform"
+            android:layout_width="100dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/recordingTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/swipeHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⬅ Swipe to cancel"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:layout_marginStart="12dp" />
+    </LinearLayout>
+
+
+    <LinearLayout
         android:id="@+id/replyLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#EEEEEE"
-        android:orientation="horizontal"
         android:visibility="gone"
+        android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewChat">
+        app:layout_constraintBottom_toTopOf="@+id/inputSection">
 
         <View
             android:layout_width="4dp"
@@ -99,7 +149,6 @@
             android:src="@drawable/ic_close" />
     </LinearLayout>
 
-
     <!-- Chat RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChat"
@@ -109,7 +158,7 @@
         android:clipToPadding="false"
         android:overScrollMode="never"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@id/inputSection"
+        app:layout_constraintBottom_toTopOf="@id/replyLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -128,6 +177,7 @@
         android:layout_marginBottom="8dp" />
 
     <!-- Input Section -->
+
     <LinearLayout
         android:id="@+id/inputSection"
         android:layout_width="0dp"

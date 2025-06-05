@@ -337,7 +337,8 @@ class AddPostClothesBottomSheet : BottomSheetDialogFragment() {
                 "clothesTitle" to clothesTitle,
                 "clothesDescription" to clothesDescription,
                 "clothesImage" to imageUrl,
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
 
             database.child(postId).setValue(postDetails).addOnCompleteListener {

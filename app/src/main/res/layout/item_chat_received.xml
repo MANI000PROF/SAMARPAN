@@ -18,6 +18,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
+    <LinearLayout
+        android:id="@+id/replyLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/reply_background"
+        android:padding="8dp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone">
         <!-- Quoted message for replies -->
         <TextView
             android:id="@+id/quotedMessageTextView"
@@ -27,11 +36,10 @@
             android:padding="6dp"
             android:textColor="@android:color/darker_gray"
             android:textStyle="italic"
-            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="Quoted message goes here" />
-
+    </LinearLayout>
         <!-- Text message -->
         <LinearLayout
             android:id="@+id/textMessageLayout"

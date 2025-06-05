@@ -17,8 +17,8 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">0dp</item>
         <item name="cornerSizeTopRight">0dp</item>
-        <item name="cornerSizeBottomLeft">36dp</item>
-        <item name="cornerSizeBottomRight">36dp</item>
+        <item name="cornerSizeBottomLeft">48dp</item>
+        <item name="cornerSizeBottomRight">48dp</item>
     </style>
 
     <style name="ThemeOverlay.Samarpan.Menu" parent="Theme.Material3.DayNight.Dialog">

@@ -341,7 +341,8 @@ class AddPostBottomSheet : BottomSheetDialogFragment() {
                 "foodTitle" to foodTitle,
                 "foodDescription" to foodDescription,
                 "foodImage" to imageUrl,
-                "timestamp" to System.currentTimeMillis()
+                "timestamp" to System.currentTimeMillis(),
+                "status" to "available"
             )
 
             database.child(postId).setValue(postDetails).addOnCompleteListener {
